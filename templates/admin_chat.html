@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration Chat - Institut Saint Charles Lwanga</title>
+    <style>
+        :root {
+            --primary-color: #1a237e;
+            --accent-color: #f57c00;
+            --bg-chat: #eceff1;
+            --admin-msg: #1a237e;
+            --user-msg: #ffffff;
+            --white: #ffffff;
+            --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font); background-color: #f0f2f5; display: flex; flex-direction: column; height: 100vh; }
+
+        /* EN-TÊTE ADMIN */
+        header {
+            background: var(--primary-color);
+            color: var(--white);
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        header h1 { font-size: 1.2rem; font-weight: bold; }
+        header span { background: #2e7d32; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+
+        /* ESPACE CHAT */
+        .chat-container {
+            flex: 1;
+            padding: 15px 5%;
+            background: var(--bg-chat);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .bubble {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            position: relative;
+            word-wrap: break-word;
+        }
+        .bubble.visiteur {
+            background: var(--user-msg);
+            align-self: flex-start;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border-bottom-left-radius: 2px;
+        }
+        .bubble.admin {
+            background: var(--admin-msg);
+            color: var(--white);
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .sender { font-size: 0.75rem; font-weight: bold; margin-bottom: 2px; }
+        .bubble.visiteur .sender { color: var(--primary-color); }
+        .bubble.admin .sender { color: #ffb74d; }
+
+        .time { font-size: 0.68rem; margin-top: 4px; display: block; text-align: right; }
+        .bubble.visiteur .time { color: #888; }
+        .bubble.admin .time { color: #b0bec5; }
+
+        /* ZONE SAISIE */
+        .chat-input {
+            display: flex;
+            padding: 12px 5%;
+            background: var(--white);
+            border-top: 1px solid #ccc;
+            gap: 10px;
+        }
+        .chat-input input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            outline: none;
+            font-size: 0.95rem;
+        }
+        .chat-input button {
+            background: var(--accent-color);
+            color: var(--white);
+            border: none;
+            padding: 0 22px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .chat-input button:hover { background: #e65100; }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 1rem; }
+            .chat-container { padding: 12px 3%; }
+            .chat-input { padding: 10px 3%; }
+            .bubble { max-width: 90%; }
+        }
+
+        .logo a {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Espace entre le logo et le texte */
+    text-decoration: none;
+}
+
+.logo img {
+    height: 45px; /* Ajustez la hauteur selon la taille souhaitée */
+    width: auto;  /* Conserve les proportions du logo */
+    object-fit: contain;
+}
+
+.logo h1 {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+/* Adaptation pour très petits téléphones */
+@media (max-width: 480px) {
+    .logo img {
+        height: 35px; /* Logo légèrement plus petit sur mobile */
+    }
+    .logo h1 {
+        font-size: 1rem; /* Texte un peu plus petit sur mobile */
+    }
+}
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+    <a href="index.html">
+      <img src="../static/images/logo.png" alt="institut saint charles lwanga">
+        <h1>Institut Saint Charles Lwanga</h1>
+    </a>
+        </div>
+    </header>
+
+    <div class="chat-container" id="chat-box"></div>
+
+    <div class="chat-input">
+        <input type="text" id="message-input" placeholder="Répondre aux visiteurs...">
+        <button onclick="sendMessage()">Envoyer</button>
+    </div>
+
+    <script>
+        async function fetchMessages() {
+            try {
+                const res = await fetch('/api/get_messages');
+                const data = await res.json();
+                const chatBox = document.getElementById('chat-box');
+
+                const isAtBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 60;
+
+                chatBox.innerHTML = '';
+                data.forEach(msg => {
+                    const bubble = document.createElement('div');
+                    bubble.className = `bubble ${msg.expediteur}`;
+
+                    const senderName = msg.expediteur === 'admin' ? 'Vous (Admin)' : msg.sender_name;
+
+                    bubble.innerHTML = `
+                        <div class="sender">${senderName}</div>
+                        <div>${msg.message}</div>
+                        <span class="time">${msg.time}</span>
+                    `;
+                    chatBox.appendChild(bubble);
+                });
+
+                if (isAtBottom) chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (err) { console.error("Erreur admin fetch", err); }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const text = input.value.trim();
+
+            if (text) {
+                await fetch('/api/send_message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sender_name: 'Admin', message: text, expediteur: 'admin' })
+                });
+                input.value = '';
+                fetchMessages();
+            }
+        }
+
+        document.getElementById('message-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        fetchMessages();
+        setInterval(fetchMessages, 2000);
+    </script>
+</body>
+</html>
