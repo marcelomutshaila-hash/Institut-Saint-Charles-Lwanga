@@ -34,6 +34,18 @@ def contact():
 def admin_chat():
     return render_template('admin_chat.html')
 
+@app.route('/apropos')
+def apropos():
+    return render_template('a-propos.html')
+
+@app.route('/formations')
+def formations():
+    return render_template('formations.html')
+
+@app.route('/actualites')
+def actualites():
+    return render_template('actualites.html')
+
 # API : Envoyer un message (visiteur ou admin)
 @app.route('/api/send_message', methods=['POST'])
 def send_message():
