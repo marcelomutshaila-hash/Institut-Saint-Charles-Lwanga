@@ -205,63 +205,45 @@
         fetchMessages();
         setInterval(fetchMessages, 2000);
 
-        async function chargerTousLesMessages() {
-    const response = await fetch('/api/get_messages');
-    const messages = await response.json();
-    
-    const zoneChat = document.getElementById('zone-chat-messages');
-    zoneChat.innerHTML = ''; 
-
-    messages.forEach(msg => {
-        const div = document.createElement('div');
-        div.className = 'message-card';
+      async function chargerTousLesMessages() {
+    try {
+        const response = await fetch('/api/get_messages');
+        const messages = await response.json();
         
-        div.innerHTML = `
-            <div class="message-header">
-                <strong>${msg.sender}</strong> <small>${msg.time}</small>
-            </div>
-            <div class="message-body">${msg.message}</div>
+        const zoneChat = document.getElementById('zone-chat-messages');
+        zoneChat.innerHTML = ''; 
+
+        messages.forEach(msg => {
+            const div = document.createElement('div');
+            div.className = 'message-card';
             
-            <!-- BOUTONS D'ACTION (Like, Dislike, Supprimer) -->
-            <div class="message-actions" style="margin-top: 8px; display: flex; gap: 10px; align-items: center;">
+            div.innerHTML = `
+                <div class="message-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <strong style="color: #1a365d;">${msg.sender}</strong>
+                    <!-- Affichage du jour et de l'heure -->
+                    <small style="color: #718096; font-size: 12px;">📅 ${msg.datetime_str}</small>
+                </div>
                 
-                <!-- Bouton Like -->
-                <button onclick="aimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer;">
-                    👍 <span>${msg.likes}</span>
-                </button>
-
-                <!-- Bouton Dislike -->
-                <button onclick="pasAimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer;">
-                    👎 <span>${msg.dislikes}</span>
-                </button>
-
-                <!-- Bouton Supprimer (Visuel Admin) -->
-                <button onclick="supprimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: red;">
-                    🗑️ Supprimer
-                </button>
-
-            </div>
-        `;
-        zoneChat.appendChild(div);
-    });
-}
-
-// --- Fonctions d'appel API JavaScript ---
-
-async function aimerMessage(id) {
-    await fetch(`/api/like_message/${id}`, { method: 'POST' });
-    chargerTousLesMessages();
-}
-
-async function pasAimerMessage(id) {
-    await fetch(`/api/dislike_message/${id}`, { method: 'POST' });
-    chargerTousLesMessages();
-}
-
-async function supprimerMessage(id) {
-    if (confirm("Voulez-vous vraiment supprimer ce commentaire ?")) {
-        await fetch(`/api/delete_message/${id}`, { method: 'DELETE' });
-        chargerTousLesMessages();
+                <div class="message-body" style="margin-bottom: 8px;">${msg.message}</div>
+                
+                <!-- Boutons d'interaction -->
+                <div class="message-actions" style="display: flex; gap: 12px; align-items: center; font-size: 14px;">
+                    <button onclick="aimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer;">
+                        👍 <span>${msg.likes}</span>
+                    </button>
+                    <button onclick="pasAimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer;">
+                        👎 <span>${msg.dislikes}</span>
+                    </button>
+                    <button onclick="supprimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #e53e3e; margin-left: auto;">
+                        🗑️ Supprimer
+                    </button>
+                </div>
+            `;
+            zoneChat.appendChild(div);
+        });
+        
+    } catch (error) {
+        console.error("Erreur lors du chargement des messages:", error);
     }
 }
     </script>
