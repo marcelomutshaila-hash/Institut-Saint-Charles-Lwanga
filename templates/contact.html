@@ -3,442 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact & Chat - Institut Saint Charles Lwanga</title>
+    <title>Contact & Espace de Discussion - Institut Saint Charles Lwanga</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        :root {
-            --primary-color: #0d47a1;
-            --secondary-color: #f57c00;
-            --dark-color: #1a237e;
-            --light-bg: #f4f6f9;
-            --white: #ffffff;
-            --text-color: #333333;
-            --bg-chat: #e5ddd5;
-            --user-msg: #dcf8c6;
-            --admin-msg: #ffffff;
-            --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: var(--font); color: var(--text-color); line-height: 1.6; background-color: var(--white); }
-        a { text-decoration: none; color: inherit; }
-        ul { list-style: none; }
-
-        /* --- EN-TÊTE & NAVIGATION --- */
-        header {
-            background: var(--white);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky; top: 0; z-index: 1000;
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 1rem 5%;
-        }
-        .logo h1 { color: var(--primary-color); font-size: 1.3rem; font-weight: 700; }
-
-        nav ul { display: flex; gap: 20px; align-items: center; }
-        nav a { font-weight: 600; padding: 5px 10px; transition: 0.3s; display: block; }
-        nav a:hover, nav a.active { color: var(--primary-color); border-bottom: 2px solid var(--primary-color); }
-        .btn-nav { background: var(--primary-color); color: var(--white) !important; border-radius: 4px; }
-
-        .menu-toggle {
-            display: none;
-            flex-direction: column;
-            cursor: pointer;
-            gap: 5px;
-        }
-        .menu-toggle span {
-            width: 25px; height: 3px;
-            background-color: var(--primary-color);
-            border-radius: 2px; transition: 0.3s;
-        }
-
-        /* --- BANNIÈRE --- */
-        .banner { background: var(--primary-color); color: var(--white); padding: 30px 8%; text-align: center; }
-        .banner h2 { font-size: 1.8rem; }
-
-        /* --- DISPOSITION PRINCIPALE --- */
-        .main-container {
-            padding: 30px 5%;
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1.8fr;
-            gap: 25px;
-        }
-
-        /* --- BLOC COORDONNÉES --- */
-        .info-card {
-            background: var(--light-bg);
-            padding: 25px;
-            border-radius: 8px;
-            border-left: 5px solid var(--primary-color);
-            height: fit-content;
-        }
-        .info-card h3 { color: var(--dark-color); font-size: 1.2rem; margin-bottom: 15px; }
-        .info-item { margin-bottom: 15px; }
-        .info-item strong { display: block; color: var(--primary-color); margin-bottom: 2px; font-size: 0.95rem; }
-        .info-item p { font-size: 0.9rem; }
-
-        /* --- MODULE CHAT --- */
-        .chat-card {
-            background: var(--white);
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            border: 1px solid #e0e0e0;
-            display: flex;
-            flex-direction: column;
-            height: 520px;
-            overflow: hidden;
-        }
-
-        .user-name-box {
-            padding: 12px 15px;
-            background: #f0f2f5;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .user-name-box label { font-size: 0.88rem; color: var(--dark-color); }
-        .user-name-box input {
-            padding: 8px 12px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            flex: 1;
-            font-size: 0.9rem;
-            outline: none;
-        }
-
-        .chat-container {
-            flex: 1;
-            padding: 15px;
-            background: var(--bg-chat);
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .bubble {
-            max-width: 82%;
-            padding: 10px 14px;
-            border-radius: 12px;
-            font-size: 0.92rem;
-            position: relative;
-            word-wrap: break-word;
-        }
-        .bubble.visiteur {
-            background: var(--user-msg);
-            align-self: flex-end;
-            border-bottom-right-radius: 2px;
-        }
-        .bubble.admin {
-            background: var(--admin-msg);
-            align-self: flex-start;
-            border-bottom-left-radius: 2px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-        }
-
-        .sender { font-size: 0.75rem; font-weight: bold; color: var(--primary-color); margin-bottom: 2px; }
-        .time { font-size: 0.68rem; color: #888; text-align: right; margin-top: 4px; display: block; }
-
-        .chat-input {
-            display: flex;
-            padding: 10px;
-            background: white;
-            border-top: 1px solid #ddd;
-            gap: 8px;
-        }
-        .chat-input input[type="text"] {
-            flex: 1;
-            padding: 10px 15px;
-            border: 1px solid #ccc;
-            border-radius: 20px;
-            outline: none;
-            font-size: 0.95rem;
-        }
-        .chat-input button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0 20px;
-            border-radius: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .chat-input button:hover { background: var(--dark-color); }
-
-        footer { background: var(--dark-color); color: var(--white); text-align: center; padding: 20px; margin-top: 40px; }
-
-        /* --- RESPONSIVE MOBILE --- */
-        @media (max-width: 850px) {
-            .main-container { grid-template-columns: 1fr; }
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f7fafc; color: #2d3748; }
+        
+        /* NAVIGATION & HEADER */
+        header { background-color: #ffffff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
+        .nav-container { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; max-width: 1100px; margin: 0 auto; }
+        .logo-title { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #1a365d; font-weight: bold; font-size: 18px; }
+        .logo-title img { height: 40px; }
+        
+        /* Menu Hamburger Mobile */
+        .menu-toggle { font-size: 24px; color: #1a365d; cursor: pointer; display: none; background: none; border: none; }
+        .nav-links { display: flex; gap: 20px; list-style: none; margin: 0; padding: 0; }
+        .nav-links a { text-decoration: none; color: #2d3748; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: #1a365d; }
 
         @media (max-width: 768px) {
-            .menu-toggle { display: flex; }
-            nav {
-                display: none; position: absolute;
-                top: 100%; left: 0; width: 100%;
-                background-color: var(--white);
-                box-shadow: 0 5px 10px rgba(0,0,0,0.1);
-            }
-            nav.active { display: block; }
-            nav ul { flex-direction: column; padding: 20px; gap: 15px; }
-            nav a { border-bottom: none !important; }
-
-            .banner h2 { font-size: 1.4rem; }
-            .main-container { padding: 15px 3%; }
-            .chat-card { height: 480px; }
-            .bubble { max-width: 90%; }
+            .menu-toggle { display: block; }
+            .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; width: 100%; background: #ffffff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 15px 0; }
+            .nav-links.active { display: flex; }
+            .nav-links li { text-align: center; padding: 10px 0; }
         }
-       .logo a {
-    display: flex;
-    align-items: center;
-    gap: 12px; /* Espace entre le logo et le texte */
-    text-decoration: none;
-}
 
-.logo img {
-    height: 45px; /* Ajustez la hauteur selon la taille souhaitée */
-    width: auto;  /* Conserve les proportions du logo */
-    object-fit: contain;
-}
+        /* BANNIÈRE */
+        .banner { background-color: #0d47a1; color: white; text-align: center; padding: 30px 20px; margin-bottom: 25px; }
+        .banner h1 { margin: 0; font-size: 24px; }
 
-.logo h1 {
-    color: var(--primary-color);
-    font-size: 1.2rem;
-    font-weight: 700;
-}
-
-/* Adaptation pour très petits téléphones */
-@media (max-width: 480px) {
-    .logo img {
-        height: 35px; /* Logo légèrement plus petit sur mobile */
-    }
-    .logo h1 {
-        font-size: 1rem; /* Texte un peu plus petit sur mobile */
-    }
-}
+        /* CONTENU PRINCIPAL */
+        .container { max-width: 900px; margin: 0 auto; padding: 0 15px 40px 15px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; border-left: 5px solid #0d47a1; }
+        
+        /* TCHAT BOX */
+        .chat-container { background: #f1f5f9; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .chat-messages { height: 350px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px; }
+        
+        .chat-input-zone { display: flex; flex-direction: column; gap: 10px; background: white; padding: 15px; border-radius: 10px; }
+        .chat-input-zone input, .chat-input-zone textarea { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+        .send-btn { background-color: #1a365d; color: white; border: none; padding: 12px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .send-btn:hover { background-color: #0d47a1; }
     </style>
 </head>
 <body>
 
-    <!-- EN-TÊTE -->
+    <!-- ENTÊTE DE NAVIGATION -->
     <header>
-        <div class="logo">
-    <a href="index.html">
-      <img src="../static/images/logo.png" alt="institut saint charles lwanga">
-        <h1>Institut Saint Charles Lwanga</h1>
-    </a>
+        <div class="nav-container">
+            <a href="/" class="logo-title">
+                <img src="/static/logo.png" alt="Logo" onerror="this.style.display='none'">
+                <span>Institut Saint Charles Lwanga</span>
+            </a>
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="/">Accueil</a></li>
+                <li><a href="/apropos">À Propos</a></li>
+                <li><a href="/formations">Formations</a></li>
+                <li><a href="/actualites">Actualités</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
         </div>
-
-        <div class="menu-toggle" id="mobile-menu">
-            <span></span><span></span><span></span>
-        </div>
-
-        <!-- Menu de Navigation -->
-<nav id="nav-menu">
-    <ul>
-        <li><a href="/" class="active">Accueil</a></li>
-        <li><a href="/apropos">À propos</a></li>
-        <li><a href="/formations">Formations</a></li>
-        <li><a href="/actualites">Actualités</a></li>
-        <li><a href="/contact" class="btn-nav">Contact</a></li>
-    </ul>
-</nav>
     </header>
 
-    <!-- BANNIÈRE -->
+    <!-- BANNIÈRE DE PAGE -->
     <div class="banner">
-        <h2>Contact & Espace de Discussion</h2>
+        <h1>Contact & Espace de Discussion</h1>
     </div>
 
-    <!-- CONTENU PRINCIPAL -->
-    <main class="main-container">
-
-        <!-- INFOS -->
-        <div class="info-card">
-            <h3>Nos Coordonnées</h3>
-            <div class="info-item">
-                <strong>Adresse</strong>
-                <p>Avenue de lubumbashi N°45, Quartier Moise Tshombe, Kolwezi/RDC</p>
-            </div>
-            <div class="info-item">
-                <strong>Téléphone & WhatsApp</strong>
-                <p>+243 971 187 082</p>
-            </div>s
-            <div class="info-item">
-                <strong>Email</strong>
-                <p>contact@institutsaintcharleslwanga.org</p>
-            </div>
-            <div class="info-item">
-                <strong>Heures d'Ouverture</strong>
-                <p>Lundi - Vendredi : 07h05 - 17h20<br>
-            </div>
+    <div class="container">
+        <!-- COORDONNÉES -->
+        <div class="card">
+            <h2 style="color: #1a365d; margin-top:0;">Nos Coordonnées</h2>
+            <p><strong>Adresse :</strong> Avenue de Lubumbashi N°45, Quartier Moïse Tshombe, Commune de Manika, Kolwezi (Lualaba)</p>
+            <p><strong>Téléphone & WhatsApp :</strong> +243 971 187 082</p>
+            <p><strong>Email :</strong> contact@institutsaintcharleslwanga.org</p>
+            <p><strong>Heures d'Ouverture :</strong> Lundi - Vendredi : 07h05 - 17h20</p>
         </div>
 
-        <!-- BOÎTE DE CHAT -->
-        <div class="chat-card">
-            <div class="user-name-box">
-                <label for="username"><strong>Nom :</strong></label>
-                <input type="text" id="username" value="Visiteur" placeholder="Entrez votre nom...">
-            </div>
-
-            <div class="chat-container" id="chat-box"></div>
-
-            <div class="chat-input">
-                <input type="text" id="message-input" placeholder="Écrivez votre message...">
-                <button onclick="sendMessage()">Envoyer</button>
-            </div>
-        </div>
-
-    </main>
-
-   <!-- SECTION LOCALISATION / GOOGLE MAPS -->
-<!-- Charger les icônes Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-<!-- PIED DE PAGE COMPLET -->
-<footer style="background-color: #1a365d; color: white; padding: 40px 20px 20px 20px; text-align: center;">
-    <div style="max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 30px;">
-        
-        <!-- LOCALISATION & ADRESSE -->
-        <div>
-            <h3 style="margin-bottom: 10px; color: #ffffff;">Nous trouver</h3>
-            <p style="margin-bottom: 20px; font-size: 15px; opacity: 0.9;">
-                <strong>Adresse :</strong> Avenue Lubumbashi, Diur, Quartier Moïse Tshombe, Commune de Manika, Kolwezi (Lualaba)
-            </p>
+        <!-- ZONE DE CHAT PUBLIC -->
+        <div class="chat-container">
+            <h3 style="margin-top:0; color: #1a365d;">Discussion en direct</h3>
             
-            <!-- Google Maps intégré -->
-            <div style="position: relative; padding-bottom: 40%; height: 0; overflow: hidden; max-width: 100%; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-                <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15655.733519106097!2d25.4800!3d-10.7167!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTDCsDQzJzAwLjEiUyAyNcKwMjknNDguMCJF!5e0!3m2!1sfr!2scd!4v1700000000000!5m2!1sfr!2scd" 
-                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" 
-                    allowfullscreen="" 
-                    loading="lazy" 
-                    referrerpolicy="no-referrer-when-downgrade">
-                </iframe>
+            <!-- Liste des messages -->
+            <div class="chat-messages" id="zone-chat-messages">
+                <!-- Les messages s'affichent ici dynamiquement -->
+            </div>
+
+            <!-- Formulaire d'envoi -->
+            <div class="chat-input-zone">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <strong style="color:#1a365d; min-width: 50px;">Nom :</strong>
+                    <input type="text" id="senderInput" placeholder="Votre nom..." value="Visiteur">
+                </div>
+                <textarea id="messageInput" rows="2" placeholder="Écrivez votre message..."></textarea>
+                <button class="send-btn" id="btnEnvoyer" onclick="envoyerMessage()">
+                    Envoyer <i class="fas fa-paper-plane"></i>
+                </button>
             </div>
         </div>
-
-        <!-- RÉSEAUX SOCIAUX -->
-        <div>
-            <h4 style="margin-bottom: 15px; color: #ffffff;">Rejoignez-nous sur les réseaux</h4>
-            <div style="display: flex; justify-content: center; gap: 20px; align-items: center;">
-                
-                <!-- WhatsApp -->
-                <a href="https://wa.me/243971187082" target="_blank" rel="noopener noreferrer" style="color: #25D366; font-size: 28px; transition: transform 0.2s;" title="WhatsApp">
-                    <i class="fab fa-whatsapp"></i>
-                </a>
-
-                <!-- TikTok -->
-                <a href="https://www.tiktok.com/@lwanga.saint.charles" target="_blank" rel="noopener noreferrer" style="color: #ffffff; font-size: 26px; transition: transform 0.2s;" title="TikTok">
-                    <i class="fab fa-tiktok"></i>
-                </a>
-
-                <!-- YouTube -->
-                <a href="https://www.youtube.com/@vMarceloMutshaila" target="_blank" rel="noopener noreferrer" style="color: #FF0000; font-size: 28px; transition: transform 0.2s;" title="YouTube">
-                    <i class="fab fa-youtube"></i>
-                </a>
-
-            </div>
-        </div>
-
     </div>
 
-    <!-- SÉPARATEUR & COPYRIGHT -->
-    <hr style="border: 0; height: 1px; background: rgba(255, 255, 255, 0.2); margin: 30px auto 20px auto; max-width: 90%;">
+    <!-- SCRIPT JAVASCRIPT CORRIGÉ -->
+    <script>
+        // 1. GESTION DU MENU DEROULANT MOBILE
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
 
-    <p style="margin: 0; font-size: 14px; opacity: 0.8;">
-        &copy; 2026 Institut Saint Charles Lwanga - Tous droits réservés.
-    </p>
-</footer>
+        if (menuToggle && navLinks) {
+            menuToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+            });
+        }
 
-<script>
-async function chargerTousLesMessages() {
-    try {
-        // Ajout d'un paramètre anti-cache (?t=...)
-        const response = await fetch('/api/get_messages?t=' + new Date().getTime());
-        const messages = await response.json();
-        
-        // On cible le conteneur du chat (ou la div des messages)
-        const zoneChat = document.getElementById('chat-messages') || document.getElementById('zone-chat-messages');
-        if (!zoneChat) return;
-        
-        zoneChat.innerHTML = ''; 
-
-        messages.forEach(msg => {
-            const div = document.createElement('div');
-            
-            // Appliquer le style Bleu Administrateur à TOUS les messages
-            div.style.backgroundColor = '#1a365d';
-            div.style.color = '#ffffff';
-            div.style.borderRadius = '10px';
-            div.style.padding = '12px 15px';
-            div.style.marginBottom = '12px';
-            div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
-            
-            // Gérer les anciennes valeurs (fallback si undefined)
-            const nomExpediteur = msg.sender || msg.nom || 'Visiteur';
-            const dateHeure = msg.datetime_str || msg.time || msg.timestamp || '';
-
-            div.innerHTML = `
-                <div style="font-weight: bold; font-size: 14px; color: #f6ad55; margin-bottom: 5px;">
-                    ${nomExpediteur}
-                </div>
+        // 2. RECUPERER LES MESSAGES
+        async function chargerTousLesMessages() {
+            try {
+                const response = await fetch('/api/get_messages?t=' + new Date().getTime());
+                const messages = await response.json();
                 
-                <div style="font-size: 15px; color: #ffffff; line-height: 1.4; margin-bottom: 8px;">
-                    ${msg.message}
-                </div>
+                const zoneChat = document.getElementById('zone-chat-messages');
+                if (!zoneChat) return;
                 
-                <div style="text-align: right; font-size: 11px; color: #cbd5e0; margin-bottom: 8px;">
-                    ${dateHeure}
-                </div>
+                zoneChat.innerHTML = ''; 
 
-                <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.2); margin: 6px 0;">
+                messages.forEach(msg => {
+                    const div = document.createElement('div');
+                    
+                    div.style.backgroundColor = '#1a365d';
+                    div.style.color = '#ffffff';
+                    div.style.borderRadius = '10px';
+                    div.style.padding = '12px 15px';
+                    div.style.marginBottom = '12px';
+                    div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.15)';
+                    
+                    const nomExpediteur = msg.sender || 'Visiteur';
+                    const dateHeure = msg.datetime_str || '';
 
-                <div style="display: flex; gap: 15px; align-items: center; font-size: 13px; margin-top: 6px;">
-                    <button onclick="aimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #ffffff;">
-                        👍 <span>${msg.likes || 0}</span>
-                    </button>
-                    <button onclick="pasAimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #ffffff;">
-                        👎 <span>${msg.dislikes || 0}</span>
-                    </button>
-                    <button onclick="supprimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #fc8181; margin-left: auto;">
-                        🗑️ Supprimer
-                    </button>
-                </div>
-            `;
-            
-            zoneChat.appendChild(div);
-        });
+                    div.innerHTML = `
+                        <div style="font-weight: bold; font-size: 14px; color: #f6ad55; margin-bottom: 5px;">
+                            ${nomExpediteur}
+                        </div>
+                        
+                        <div style="font-size: 15px; color: #ffffff; line-height: 1.4; margin-bottom: 8px;">
+                            ${msg.message}
+                        </div>
+                        
+                        <div style="text-align: right; font-size: 11px; color: #cbd5e0; margin-bottom: 8px;">
+                            ${dateHeure}
+                        </div>
 
-    } catch (error) {
-        console.error("Erreur de chargement des messages:", error);
-    }
-}
+                        <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.2); margin: 6px 0;">
 
-// Fonctions API
-async function aimerMessage(id) {
-    await fetch(`/api/like_message/${id}`, { method: 'POST' });
-    chargerTousLesMessages();
-}
+                        <div style="display: flex; gap: 15px; align-items: center; font-size: 13px; margin-top: 6px;">
+                            <button onclick="aimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #ffffff;">
+                                👍 <span>${msg.likes || 0}</span>
+                            </button>
+                            <button onclick="pasAimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #ffffff;">
+                                👎 <span>${msg.dislikes || 0}</span>
+                            </button>
+                            <button onclick="supprimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #fc8181; margin-left: auto;">
+                                🗑️ Supprimer
+                            </button>
+                        </div>
+                    `;
+                    
+                    zoneChat.appendChild(div);
+                });
 
-async function pasAimerMessage(id) {
-    await fetch(`/api/dislike_message/${id}`, { method: 'POST' });
-    chargerTousLesMessages();
-}
+            } catch (error) {
+                console.error("Erreur de chargement :", error);
+            }
+        }
 
-async function supprimerMessage(id) {
-    if (confirm("Voulez-vous supprimer ce message ?")) {
-        await fetch(`/api/delete_message/${id}`, { method: 'DELETE' });
+        // 3. ENVOYER UN MESSAGE
+        async function envoyerMessage() {
+            const sender = document.getElementById('senderInput').value.trim() || 'Visiteur';
+            const message = document.getElementById('messageInput').value.trim();
+
+            if (!message) {
+                alert("Veuillez saisir un message.");
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/send_message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sender: sender, message: message })
+                });
+
+                if (response.ok) {
+                    document.getElementById('messageInput').value = '';
+                    chargerTousLesMessages();
+                } else {
+                    alert("Erreur lors de l'envoi du message.");
+                }
+            } catch (error) {
+                console.error("Erreur d'envoi :", error);
+            }
+        }
+
+        // 4. LIKES, DISLIKES & SUPPRESSION
+        async function aimerMessage(id) {
+            await fetch(`/api/like_message/${id}`, { method: 'POST' });
+            chargerTousLesMessages();
+        }
+
+        async function pasAimerMessage(id) {
+            await fetch(`/api/dislike_message/${id}`, { method: 'POST' });
+            chargerTousLesMessages();
+        }
+
+        async function supprimerMessage(id) {
+            if (confirm("Voulez-vous supprimer ce message ?")) {
+                await fetch(`/api/delete_message/${id}`, { method: 'DELETE' });
+                chargerTousLesMessages();
+            }
+        }
+
+        // Rafraîchissement automatique toutes les 3 secondes
+        setInterval(chargerTousLesMessages, 3000);
         chargerTousLesMessages();
-    }
-}
-
-// Rafraîchissement toutes les 3 secondes
-setInterval(chargerTousLesMessages, 3000);
-chargerTousLesMessages();
-</script>
+    </script>
 </body>
 </html>
