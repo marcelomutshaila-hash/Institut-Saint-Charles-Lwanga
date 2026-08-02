@@ -410,6 +410,65 @@
 
         fetchMessages();
         setInterval(fetchMessages, 2000);
+        async function chargerTousLesMessages() {
+    const response = await fetch('/api/get_messages');
+    const messages = await response.json();
+    
+    const zoneChat = document.getElementById('zone-chat-messages');
+    zoneChat.innerHTML = ''; 
+
+    messages.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = 'message-card';
+        
+        div.innerHTML = `
+            <div class="message-header">
+                <strong>${msg.sender}</strong> <small>${msg.time}</small>
+            </div>
+            <div class="message-body">${msg.message}</div>
+            
+            <!-- BOUTONS D'ACTION (Like, Dislike, Supprimer) -->
+            <div class="message-actions" style="margin-top: 8px; display: flex; gap: 10px; align-items: center;">
+                
+                <!-- Bouton Like -->
+                <button onclick="aimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer;">
+                    👍 <span>${msg.likes}</span>
+                </button>
+
+                <!-- Bouton Dislike -->
+                <button onclick="pasAimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer;">
+                    👎 <span>${msg.dislikes}</span>
+                </button>
+
+                <!-- Bouton Supprimer (Visuel Admin) -->
+                <button onclick="supprimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: red;">
+                    🗑️ Supprimer
+                </button>
+
+            </div>
+        `;
+        zoneChat.appendChild(div);
+    });
+}
+
+// --- Fonctions d'appel API JavaScript ---
+
+async function aimerMessage(id) {
+    await fetch(`/api/like_message/${id}`, { method: 'POST' });
+    chargerTousLesMessages();
+}
+
+async function pasAimerMessage(id) {
+    await fetch(`/api/dislike_message/${id}`, { method: 'POST' });
+    chargerTousLesMessages();
+}
+
+async function supprimerMessage(id) {
+    if (confirm("Voulez-vous vraiment supprimer ce commentaire ?")) {
+        await fetch(`/api/delete_message/${id}`, { method: 'DELETE' });
+        chargerTousLesMessages();
+    }
+}
     </script>
 </body>
 </html>
