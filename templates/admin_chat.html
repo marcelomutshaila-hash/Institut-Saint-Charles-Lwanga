@@ -205,7 +205,7 @@
         fetchMessages();
         setInterval(fetchMessages, 2000);
 
-      async function chargerTousLesMessages() {
+     async function chargerTousLesMessages() {
     try {
         const response = await fetch('/api/get_messages');
         const messages = await response.json();
@@ -215,37 +215,65 @@
 
         messages.forEach(msg => {
             const div = document.createElement('div');
-            div.className = 'message-card';
             
+            // Style uniforme bleu pour TOUS les messages
+            div.style.backgroundColor = '#1a365d';
+            div.style.color = '#ffffff';
+            div.style.borderRadius = '12px';
+            div.style.padding = '12px 16px';
+            div.style.marginBottom = '12px';
+            div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.15)';
+            
+            const nomExpediteur = msg.sender || 'Anonyme';
+            const dateHeure = msg.datetime_str || '';
+
             div.innerHTML = `
-                <div class="message-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                    <strong style="color: #1a365d;">${msg.sender}</strong>
-                    <!-- Affichage du jour et de l'heure -->
-                    <small style="color: #718096; font-size: 12px;">📅 ${msg.datetime_str}</small>
+                <!-- En-tête : Nom de l'expéditeur -->
+                <div style="font-weight: bold; font-size: 14px; margin-bottom: 6px; color: #f6ad55;">
+                    ${nomExpediteur}
                 </div>
                 
-                <div class="message-body" style="margin-bottom: 8px;">${msg.message}</div>
+                <!-- Corps du message -->
+                <div style="font-size: 15px; line-height: 1.4; margin-bottom: 8px; color: #ffffff;">
+                    ${msg.message}
+                </div>
                 
-                <!-- Boutons d'interaction -->
-                <div class="message-actions" style="display: flex; gap: 12px; align-items: center; font-size: 14px;">
-                    <button onclick="aimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer;">
+                <!-- Horodatage (aligné à droite) -->
+                <div style="text-align: right; font-size: 11px; opacity: 0.8; color: #e2e8f0; margin-bottom: 8px;">
+                    ${dateHeure}
+                </div>
+
+                <!-- Séparateur discret -->
+                <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.2); margin: 6px 0;">
+
+                <!-- Boutons d'action (Likes, Dislikes, Supprimer) -->
+                <div style="display: flex; gap: 15px; align-items: center; font-size: 13px; margin-top: 6px;">
+                    <button onclick="aimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #ffffff;">
                         👍 <span>${msg.likes}</span>
                     </button>
-                    <button onclick="pasAimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer;">
+                    <button onclick="pasAimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #ffffff;">
                         👎 <span>${msg.dislikes}</span>
                     </button>
-                    <button onclick="supprimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #e53e3e; margin-left: auto;">
+                    <button onclick="supprimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #fc8181; margin-left: auto;">
                         🗑️ Supprimer
                     </button>
                 </div>
             `;
+            
             zoneChat.appendChild(div);
         });
-        
+
+        // Dérouler automatique vers le bas
+        zoneChat.scrollTop = zoneChat.scrollHeight;
+
     } catch (error) {
-        console.error("Erreur lors du chargement des messages:", error);
+        console.error("Erreur de chargement :", error);
     }
 }
+
+// Actualisation automatique toutes les 3 secondes
+setInterval(chargerTousLesMessages, 3000);
+chargerTousLesMessages();
     </script>
 </body>
 </html>
