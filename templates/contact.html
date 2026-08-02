@@ -118,114 +118,61 @@
         }
 
         // 2. RECUPERER LES MESSAGES
-        async function chargerTousLesMessages() {
-            try {
-                const response = await fetch('/api/get_messages?t=' + new Date().getTime());
-                const messages = await response.json();
+     async function chargerTousLesMessages() {
+    try {
+        const response = await fetch('/api/get_messages?t=' + new Date().getTime());
+        const messages = await response.json();
+        
+        const zoneChat = document.getElementById('zone-chat-messages');
+        if (!zoneChat) return;
+        
+        zoneChat.innerHTML = ''; 
+
+        messages.forEach(msg => {
+            const div = document.createElement('div');
+            
+            div.style.backgroundColor = '#1a365d';
+            div.style.color = '#ffffff';
+            div.style.borderRadius = '10px';
+            div.style.padding = '12px 15px';
+            div.style.marginBottom = '12px';
+            div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.15)';
+            
+            const nomExpediteur = msg.sender || 'Visiteur';
+            const dateHeure = msg.datetime_str || '';
+
+            div.innerHTML = `
+                <div style="font-weight: bold; font-size: 14px; color: #f6ad55; margin-bottom: 5px;">
+                    ${nomExpediteur}
+                </div>
                 
-                const zoneChat = document.getElementById('zone-chat-messages');
-                if (!zoneChat) return;
+                <div style="font-size: 15px; color: #ffffff; line-height: 1.4; margin-bottom: 8px;">
+                    ${msg.message}
+                </div>
                 
-                zoneChat.innerHTML = ''; 
+                <div style="text-align: right; font-size: 11px; color: #cbd5e0; margin-bottom: 8px;">
+                    ${dateHeure}
+                </div>
 
-                messages.forEach(msg => {
-                    const div = document.createElement('div');
-                    
-                    div.style.backgroundColor = '#1a365d';
-                    div.style.color = '#ffffff';
-                    div.style.borderRadius = '10px';
-                    div.style.padding = '12px 15px';
-                    div.style.marginBottom = '12px';
-                    div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.15)';
-                    
-                    const nomExpediteur = msg.sender || 'Visiteur';
-                    const dateHeure = msg.datetime_str || '';
+                <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.2); margin: 6px 0;">
 
-                    div.innerHTML = `
-                        <div style="font-weight: bold; font-size: 14px; color: #f6ad55; margin-bottom: 5px;">
-                            ${nomExpediteur}
-                        </div>
-                        
-                        <div style="font-size: 15px; color: #ffffff; line-height: 1.4; margin-bottom: 8px;">
-                            ${msg.message}
-                        </div>
-                        
-                        <div style="text-align: right; font-size: 11px; color: #cbd5e0; margin-bottom: 8px;">
-                            ${dateHeure}
-                        </div>
+                <!-- Boutons d'action PUBLICS (Likes et Dislikes SEULEMENT) -->
+                <div style="display: flex; gap: 15px; align-items: center; font-size: 13px; margin-top: 6px;">
+                    <button onclick="aimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #ffffff;">
+                        👍 <span>${msg.likes || 0}</span>
+                    </button>
+                    <button onclick="pasAimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #ffffff;">
+                        👎 <span>${msg.dislikes || 0}</span>
+                    </button>
+                </div>
+            `;
+            
+            zoneChat.appendChild(div);
+        });
 
-                        <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.2); margin: 6px 0;">
-
-                        <div style="display: flex; gap: 15px; align-items: center; font-size: 13px; margin-top: 6px;">
-                            <button onclick="aimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #ffffff;">
-                                👍 <span>${msg.likes || 0}</span>
-                            </button>
-                            <button onclick="pasAimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #ffffff;">
-                                👎 <span>${msg.dislikes || 0}</span>
-                            </button>
-                            <button onclick="supprimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #fc8181; margin-left: auto;">
-                                🗑️ Supprimer
-                            </button>
-                        </div>
-                    `;
-                    
-                    zoneChat.appendChild(div);
-                });
-
-            } catch (error) {
-                console.error("Erreur de chargement :", error);
-            }
-        }
-
-        // 3. ENVOYER UN MESSAGE
-        async function envoyerMessage() {
-            const sender = document.getElementById('senderInput').value.trim() || 'Visiteur';
-            const message = document.getElementById('messageInput').value.trim();
-
-            if (!message) {
-                alert("Veuillez saisir un message.");
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/send_message', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sender: sender, message: message })
-                });
-
-                if (response.ok) {
-                    document.getElementById('messageInput').value = '';
-                    chargerTousLesMessages();
-                } else {
-                    alert("Erreur lors de l'envoi du message.");
-                }
-            } catch (error) {
-                console.error("Erreur d'envoi :", error);
-            }
-        }
-
-        // 4. LIKES, DISLIKES & SUPPRESSION
-        async function aimerMessage(id) {
-            await fetch(`/api/like_message/${id}`, { method: 'POST' });
-            chargerTousLesMessages();
-        }
-
-        async function pasAimerMessage(id) {
-            await fetch(`/api/dislike_message/${id}`, { method: 'POST' });
-            chargerTousLesMessages();
-        }
-
-        async function supprimerMessage(id) {
-            if (confirm("Voulez-vous supprimer ce message ?")) {
-                await fetch(`/api/delete_message/${id}`, { method: 'DELETE' });
-                chargerTousLesMessages();
-            }
-        }
-
-        // Rafraîchissement automatique toutes les 3 secondes
-        setInterval(chargerTousLesMessages, 3000);
-        chargerTousLesMessages();
-    </script>
+    } catch (error) {
+        console.error("Erreur de chargement :", error);
+    }
+}
 </body>
 </html>
