@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>À Propos - Institut Saint Charles Lwanga</title>
+
+    <!-- FONTAWESOME POUR LES ICÔNES -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #0d47a1;
+            --secondary-color: #f57c00;
+            --dark-color: #1a237e;
+            --light-bg: #f4f6f9;
+            --text-color: #333333;
+            --white: #ffffff;
+            --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font); color: var(--text-color); line-height: 1.6; background-color: var(--white); }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+
+        /* --- EN-TÊTE & NAVIGATION --- */
+        header {
+            background: var(--white);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky; top: 0; z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 5%;
+            gap: 20px;
+        }
+
+        .logo a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            white-space: nowrap; /* Empêche le titre de se casser brusquement */
+        }
+
+        .logo img {
+            height: 45px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .logo h1 {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        /* MENU ALIGNÉ À DROITE */
+        nav {
+            margin-left: auto; /* Pousse la navigation tout à droite */
+        }
+
+        nav ul {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            font-weight: 600;
+            padding: 6px 12px;
+            transition: 0.3s;
+            display: block;
+            white-space: nowrap;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .btn-nav {
+            background: var(--primary-color);
+            color: var(--white) !important;
+            border-radius: 4px;
+        }
+
+        /* Bouton Menu Hamburger Mobile */
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 5px;
+            margin-left: auto; /* Aligne le bouton hamburger à droite sur mobile */
+        }
+
+        .menu-toggle span {
+            width: 25px; height: 3px;
+            background-color: var(--primary-color);
+            border-radius: 2px; transition: 0.3s;
+        }
+
+        /* --- BANNIÈRE DE TITRE --- */
+        .banner { background: var(--primary-color); color: var(--white); padding: 40px 8%; text-align: center; }
+        .banner h2 { font-size: 2rem; margin-bottom: 8px; }
+        .banner p { font-size: 1.05rem; opacity: 0.9; }
+
+        /* --- CONTENU ET SECTIONS --- */
+        .content { padding: 40px 8%; max-width: 1000px; margin: 0 auto; }
+
+        .section-title {
+            color: var(--primary-color);
+            margin-top: 35px;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+
+        .history-card {
+            background: var(--light-bg);
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .history-card h4 {
+            color: var(--dark-color);
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .options-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .option-item {
+            background: var(--white);
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-weight: 600;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- STATISTIQUES --- */
+        .stats-about {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .stat-item {
+            background: var(--light-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .stat-item i {
+            font-size: 2rem;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        .stat-item h3 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+        }
+
+        /* --- DIRECTION (PRÉFET & DIRECTEUR) --- */
+        .leadership-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 25px;
+        }
+
+        .leader-card {
+            background: var(--white);
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+
+        .leader-card:hover { transform: translateY(-5px); }
+
+        .leader-card img {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 4px solid var(--primary-color);
+        }
+
+        .leader-card h4 { color: var(--dark-color); font-size: 1.2rem; margin-bottom: 5px; }
+
+        .leader-card .role {
+            color: var(--secondary-color);
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .leader-card p { font-style: italic; color: #555; font-size: 0.95rem; }
+
+        /* --- GALERIE PHOTO --- */
+        .gallery-section {
+            background-color: var(--light-bg);
+            padding: 30px;
+            text-align: center;
+            margin-top: 40px;
+            border-radius: 8px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .gallery-item p { margin-top: 8px; font-size: 0.85rem; font-weight: 600; color: #555; }
+
+        /* --- FOOTER --- */
+        footer { background: var(--dark-color); color: var(--white); text-align: center; padding: 20px; margin-top: 40px; }
+
+        /* --- RESPONSIVE MOBILE & TABLETTE --- */
+        @media (max-width: 992px) {
+            .menu-toggle { display: flex; }
+
+            nav {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background-color: var(--white);
+                box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            }
+
+            nav.active { display: block; }
+            nav ul { flex-direction: column; padding: 20px; gap: 15px; }
+            nav a { border-bottom: none !important; }
+
+            .banner h2 { font-size: 1.5rem; }
+            .content { padding: 25px 5%; }
+            .leader-card { padding: 18px; }
+        }
+
+        @media (max-width: 480px) {
+            .logo img { height: 35px; }
+            .logo h1 { font-size: 0.95rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- EN-TÊTE -->
+    <header>
+         <div class="logo">
+    <a href="index.html">
+      <img src="../static/images/logo.png" alt="institut saint charles lwanga">
+        <h1>Institut Saint Charles Lwanga</h1>
+    </a>
+        </div>
+
+        <!-- Bouton Hamburger Mobile -->
+        <div class="menu-toggle" id="mobile-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <!-- NAVIGATION PLACEÉ À DROITE -->
+        <nav id="nav-menu">
+            <ul>
+                <li><a href="/">Accueil</a></li>
+                <li><a href="/a-propos" class="active">À propos</a></li>
+                <li><a href="/formations">Formations</a></li>
+                <li><a href="/actualites">Actualités</a></li>
+                <li><a href="/contact" class="btn-nav">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- BANNIÈRE -->
+    <div class="banner">
+        <h2>À Propos de Notre Institut</h2>
+        <p>Un héritage d'excellence éducative et spirituelle au cœur du Lualaba</p>
+    </div>
+
+    <!-- CONTENU PRINCIPAL -->
+    <main class="content">
+
+        <!-- 1. HISTORIQUE -->
+        <div class="section-title">
+            <i class="fa-solid fa-clock-rotate-left"></i> Historique de l'École
+        </div>
+
+        <div class="history-card">
+            <h4>A. Origine</h4>
+            <p>
+                Situé à environ dix kilomètres du centre-ville de Kolwezi, l'Institut porte le nom de la paroisse qui l'héberge. Son implantation répond au besoin de la population locale composée principalement de paysans et de familles aux moyens modestes.
+            </p>
+            <br>
+            <p>
+                À l'époque du <strong>Père Marc Fiut</strong>, curé de la paroisse, la cité manquait d'école secondaire. C'est en <strong>1999</strong> que l'institut a commencé à fonctionner dans les locaux paroissiaux puis dans les écoles primaires environnantes (Maelozo, Kunguila, Maendeleo, Tusaidiyane).
+            </p>
+            <br>
+            <p>
+                Grâce au dévouement du <strong>Père Gerry Gregoor</strong> et au soutien de donateurs européens, l'école s'est dotée en dix ans de ses propres infrastructures. L'établissement compte aujourd'hui <strong>17 locaux</strong>, une grande salle de conférences, une salle d'informatique, une salle de labo, une boutique, un restaurant, une salle des professeurs et des bureaux administratifs.
+            </p>
+        </div>
+
+        <div class="history-card">
+            <h4>B. Évolution et Spiritualité Salvatorienne</h4>
+            <p>
+                Dirigée à ses débuts par des préfets laïcs avec un effectif de 300 à 400 élèves, l'école connaît un tournant en octobre 2006 avec l'arrivée du <strong>Frère Claude Ndumb A Nawej</strong> (Société du Divin Sauveur). Devenu Préfet des études en 2007, il insuffle à l'institut la spiritualité salvatorienne :
+            </p>
+            <br>
+            <ul>
+                <li>• Citations du vénérable Père Fondateur JORDAN gravées sur les bâtiments.</li>
+                <li>• Emblème salvatorien apposé sur les journaux de classe et cahiers de communication.</li>
+                <li>• Sélection rigoureuse du corps professoral axée sur la compétence.</li>
+            </ul>
+        </div>
+
+        <!-- 2. SECTIONS ORGANISÉES -->
+        <div class="section-title">
+            <i class="fa-solid fa-book-open"></i> Sections Organisées
+        </div>
+        <p>L'institut organise actuellement six filières de formation :</p>
+
+        <div class="options-list">
+            <div class="option-item"><i class="fa-solid fa-briefcase"></i> Commerciale et Gestion</div>
+            <div class="option-item"><i class="fa-solid fa-user-graduate"></i> Pédagogie Générale</div>
+            <div class="option-item"><i class="fa-solid fa-flask"></i> Scientifique</div>
+            <div class="option-item"><i class="fa-solid fa-wheat-awn"></i> Agriculture</div>
+            <div class="option-item"><i class="fa-solid fa-mountain"></i> Géomine</div>
+            <div class="option-item"><i class="fa-solid fa-graduation-cap"></i> Éducation de Base</div>
+        </div>
+
+        <!-- 3. ÉQUIPE DIRIGEANTE EN HISTORIQUE -->
+        <div class="section-title">
+            <i class="fa-solid fa-user-tie"></i> Dirigeants Historiques
+        </div>
+
+        <div class="history-card">
+            <h4>Nos Directeurs :</h4>
+            <p>
+                • <strong>M. Fidèle NDJAMBA KATANDA</strong> (1999 - 2011)<br>
+                • <strong>M. Hubert AMANI MENDAKU</strong> (2011 - 2019)<br>
+                • <strong>M. Delphin KAGUNGE MUHOYA</strong> (2019 à nos jours)
+            </p>
+            <br>
+            <h4>Nos Préfets des Études :</h4>
+            <p>
+                • <strong>M. TSHIYAZ DIBAY</strong> (1999)<br>
+                • <strong>M. KASONG TSHAL MUDJABAT KARTON</strong> (1999 - 2001)<br>
+                • <strong>M. MUSOLE MASAMBO Dieudonné</strong> (2001 - 2006)<br>
+                • <strong>Père NDUMB A NAWEJ Claude</strong> (2006 - 2007)<br>
+                • <strong>Père MADIBA LAURENT</strong> (2007 - 2013)<br>
+                • <strong>Père FIDÈLE MUSAU MUKANYA</strong> (2013 - 2017)<br>
+                • <strong>Père MICHEL LEMBE LUNGAYI</strong> (2017 à nos jours)
+            </p>
+        </div>
+
+        <!-- 4. STATISTIQUES -->
+        <div class="stats-about">
+            <div class="stat-item">
+                <i class="fa-solid fa-users"></i>
+                <h3>+1000</h3>
+                <p>Élèves inscrits</p>
+            </div>
+            <div class="stat-item">
+                <i class="fa-solid fa-chalkboard-user"></i>
+                <h3>42</h3>
+                <p>Enseignants qualifiés</p>
+            </div>
+            <div class="stat-item">
+                <i class="fa-solid fa-award"></i>
+                <h3>25+</h3>
+                <p>Ans d'Excellence</p>
+            </div>
+            <div class="stat-item">
+                <i class="fa-solid fa-certificate"></i>
+                <h3>+900</h3>
+                <p>Diplômés formés</p>
+            </div>
+        </div>
+
+        <!-- 5. MOTS DE LA DIRECTION -->
+        <div class="section-title">
+            <i class="fa-solid fa-comment-dots"></i> Mots de la Direction
+        </div>
+
+        <div class="leadership-grid">
+            <!-- PRÉFET -->
+            <div class="leader-card">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Photo du Préfet des Études">
+                <h4>Père Michel Lembe Lungayi</h4>
+                <div class="role">Préfet des Études</div>
+                <p>« Notre priorité est de fournir un cadre d'apprentissage rigoureux et motivant pour amener chaque élève au sommet de ses compétences. »</p>
+            </div>
+
+            <!-- DIRECTEUR -->
+            <div class="leader-card">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Photo du Directeur">
+                <h4>M. Delphin Kagunge Muhoya</h4>
+                <div class="role">Directeur de l'Établissement</div>
+                <p>« Chaque élève possède un potentiel unique. Notre rôle est de lui donner les moyens de le concrétiser dans les meilleures conditions. »</p>
+            </div>
+        </div>
+
+        <!-- 6. GALERIE PHOTOS -->
+        <div class="gallery-section">
+            <div class="section-title" style="border: none; justify-content: center; margin-top: 0;">
+                <i class="fa-solid fa-images"></i> Nos Infrastructures
+            </div>
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/batiment.jpg') }}" alt="Façade de l'école">
+                    <p>Infrastructures Principales</p>
+                </div>
+                <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/info1.jpg') }}" alt="Salle d'informatique">
+                    <p>Salle d'Informatique</p>
+                </div>
+                <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/geomine5.jpg') }}" alt="Section Géomine">
+                    <p>Travaux Pratiques & Section Géomine</p>
+                </div>
+                <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/terrain1.jpg') }}" alt="Terrain de l'école">
+                    <p>Espaces Sportifs & Récréatifs</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- PIED DE PAGE -->
+    <footer>
+        <p>&copy; 2026 Institut Saint Charles Lwanga - Tous droits réservés.</p>
+    </footer>
+
+    <!-- SCRIPT JS MENU MOBILE -->
+    <script>
+        const menuToggle = document.getElementById('mobile-menu');
+        const navMenu = document.getElementById('nav-menu');
+
+        menuToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+    </script>
+
+</body>
+</html>
