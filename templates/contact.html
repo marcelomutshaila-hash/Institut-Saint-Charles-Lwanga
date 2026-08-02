@@ -354,110 +354,55 @@
     </p>
 </footer>
 
-    <script>
-        // Menu Hamburger Mobile
-        const menuToggle = document.getElementById('mobile-menu');
-        const navMenu = document.getElementById('nav-menu');
-        menuToggle.addEventListener('click', () => navMenu.classList.toggle('active'));
-
-        // Logique du Chat
-        async function fetchMessages() {
-            try {
-                const res = await fetch('/api/get_messages');
-                const data = await res.json();
-                const chatBox = document.getElementById('chat-box');
-
-                const isAtBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 60;
-
-                chatBox.innerHTML = '';
-                data.forEach(msg => {
-                    const bubble = document.createElement('div');
-                    bubble.className = `bubble ${msg.expediteur}`;
-
-                    const senderName = msg.expediteur === 'admin' ? 'Secrétariat / Admin' : msg.sender_name;
-
-                    bubble.innerHTML = `
-                        <div class="sender">${senderName}</div>
-                        <div>${msg.message}</div>
-                        <span class="time">${msg.time}</span>
-                    `;
-                    chatBox.appendChild(bubble);
-                });
-
-                if (isAtBottom) chatBox.scrollTop = chatBox.scrollHeight;
-            } catch (err) { console.error("Erreur de chargement", err); }
-        }
-
-        async function sendMessage() {
-            const input = document.getElementById('message-input');
-            const username = document.getElementById('username').value || 'Visiteur';
-            const text = input.value.trim();
-
-            if (text) {
-                await fetch('/api/send_message', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sender_name: username, message: text, expediteur: 'visiteur' })
-                });
-                input.value = '';
-                fetchMessages();
-            }
-        }
-
-        document.getElementById('message-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-
-        fetchMessages();
-        setInterval(fetchMessages, 2000);
-    async function chargerTousLesMessages() {
+<script>
+async function chargerTousLesMessages() {
     try {
-        const response = await fetch('/api/get_messages');
+        // Ajout d'un paramètre anti-cache (?t=...)
+        const response = await fetch('/api/get_messages?t=' + new Date().getTime());
         const messages = await response.json();
         
-        const zoneChat = document.getElementById('zone-chat-messages');
+        // On cible le conteneur du chat (ou la div des messages)
+        const zoneChat = document.getElementById('chat-messages') || document.getElementById('zone-chat-messages');
+        if (!zoneChat) return;
+        
         zoneChat.innerHTML = ''; 
 
         messages.forEach(msg => {
             const div = document.createElement('div');
             
-            // Style uniforme bleu pour TOUS les messages
+            // Appliquer le style Bleu Administrateur à TOUS les messages
             div.style.backgroundColor = '#1a365d';
             div.style.color = '#ffffff';
-            div.style.borderRadius = '12px';
-            div.style.padding = '12px 16px';
+            div.style.borderRadius = '10px';
+            div.style.padding = '12px 15px';
             div.style.marginBottom = '12px';
-            div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.15)';
+            div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
             
-            const nomExpediteur = msg.sender || 'Anonyme';
-            const dateHeure = msg.datetime_str || '';
+            // Gérer les anciennes valeurs (fallback si undefined)
+            const nomExpediteur = msg.sender || msg.nom || 'Visiteur';
+            const dateHeure = msg.datetime_str || msg.time || msg.timestamp || '';
 
             div.innerHTML = `
-                <!-- En-tête : Nom de l'expéditeur -->
-                <div style="font-weight: bold; font-size: 14px; margin-bottom: 6px; color: #f6ad55;">
+                <div style="font-weight: bold; font-size: 14px; color: #f6ad55; margin-bottom: 5px;">
                     ${nomExpediteur}
                 </div>
                 
-                <!-- Corps du message -->
-                <div style="font-size: 15px; line-height: 1.4; margin-bottom: 8px; color: #ffffff;">
+                <div style="font-size: 15px; color: #ffffff; line-height: 1.4; margin-bottom: 8px;">
                     ${msg.message}
                 </div>
                 
-                <!-- Horodatage (aligné à droite) -->
-                <div style="text-align: right; font-size: 11px; opacity: 0.8; color: #e2e8f0; margin-bottom: 8px;">
+                <div style="text-align: right; font-size: 11px; color: #cbd5e0; margin-bottom: 8px;">
                     ${dateHeure}
                 </div>
 
-                <!-- Séparateur discret -->
                 <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.2); margin: 6px 0;">
 
-                <!-- Boutons d'action (Likes, Dislikes, Supprimer) -->
                 <div style="display: flex; gap: 15px; align-items: center; font-size: 13px; margin-top: 6px;">
                     <button onclick="aimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #ffffff;">
-                        👍 <span>${msg.likes}</span>
+                        👍 <span>${msg.likes || 0}</span>
                     </button>
                     <button onclick="pasAimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #ffffff;">
-                        👎 <span>${msg.dislikes}</span>
+                        👎 <span>${msg.dislikes || 0}</span>
                     </button>
                     <button onclick="supprimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #fc8181; margin-left: auto;">
                         🗑️ Supprimer
@@ -468,17 +413,32 @@
             zoneChat.appendChild(div);
         });
 
-        // Dérouler automatique vers le bas
-        zoneChat.scrollTop = zoneChat.scrollHeight;
-
     } catch (error) {
-        console.error("Erreur de chargement :", error);
+        console.error("Erreur de chargement des messages:", error);
     }
 }
 
-// Actualisation automatique toutes les 3 secondes
+// Fonctions API
+async function aimerMessage(id) {
+    await fetch(`/api/like_message/${id}`, { method: 'POST' });
+    chargerTousLesMessages();
+}
+
+async function pasAimerMessage(id) {
+    await fetch(`/api/dislike_message/${id}`, { method: 'POST' });
+    chargerTousLesMessages();
+}
+
+async function supprimerMessage(id) {
+    if (confirm("Voulez-vous supprimer ce message ?")) {
+        await fetch(`/api/delete_message/${id}`, { method: 'DELETE' });
+        chargerTousLesMessages();
+    }
+}
+
+// Rafraîchissement toutes les 3 secondes
 setInterval(chargerTousLesMessages, 3000);
 chargerTousLesMessages();
-    </script>
+</script>
 </body>
 </html>
