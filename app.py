@@ -7,11 +7,11 @@ class ChatMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sender = db.Column(db.String(100), nullable=False)
     message = db.Column(db.Text, nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    likes = db.Column(db.Integer, default=0)       # Compteur de Likes
-    dislikes = db.Column(db.Integer, default=0)    # Compteur de Dislikes
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow) # Date et heure d'enregistrement
+    likes = db.Column(db.Integer, default=0)
+    dislikes = db.Column(db.Integer, default=0)
 
-# --- ROUTE : Récupérer tous les messages ---
+# --- ROUTE : Récupérer tous les messages avec Jour + Heure ---
 @app.route('/api/get_messages', methods=['GET'])
 def get_messages():
     messages = ChatMessage.query.order_by(ChatMessage.timestamp.asc()).all()
@@ -21,32 +21,9 @@ def get_messages():
             'id': msg.id,
             'sender': msg.sender,
             'message': msg.message,
-            'time': msg.timestamp.strftime('%H:%M'),
+            # Formatage : Jour/Mois/Année à Heure:Minute (ex: 02/08/2026 à 19:12)
+            'datetime_str': msg.timestamp.strftime('%d/%m/%Y à %H:%M') if msg.timestamp else '',
             'likes': msg.likes or 0,
             'dislikes': msg.dislikes or 0
         })
     return jsonify(output)
-
-# --- ROUTE : Aimer un message (+1 Like) ---
-@app.route('/api/like_message/<int:msg_id>', methods=['POST'])
-def like_message(msg_id):
-    msg = ChatMessage.query.get_or_404(msg_id)
-    msg.likes = (msg.likes or 0) + 1
-    db.session.commit()
-    return jsonify({'status': 'success', 'likes': msg.likes})
-
-# --- ROUTE : Ne pas aimer un message (+1 Dislike) ---
-@app.route('/api/dislike_message/<int:msg_id>', methods=['POST'])
-def dislike_message(msg_id):
-    msg = ChatMessage.query.get_or_404(msg_id)
-    msg.dislikes = (msg.dislikes or 0) + 1
-    db.session.commit()
-    return jsonify({'status': 'success', 'dislikes': msg.dislikes})
-
-# --- ROUTE : Supprimer un message (Admin) ---
-@app.route('/api/delete_message/<int:msg_id>', methods=['DELETE'])
-def delete_message(msg_id):
-    msg = ChatMessage.query.get_or_404(msg_id)
-    db.session.delete(msg)
-    db.session.commit()
-    return jsonify({'status': 'success'})
