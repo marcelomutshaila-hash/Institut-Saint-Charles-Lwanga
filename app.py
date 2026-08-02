@@ -1,16 +1,18 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 
-# --- CONFIGURATION BASE DE DONNÉES ---
+# 1. Configuration de la base de données
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# 2. Initialisation de db (OBLIGATOIRE avant de créer les modèles)
 db = SQLAlchemy(app)
 
-# --- MODÈLE DE BASE DE DONNÉES ---
+# 3. Modèle de la base de données
 class ChatMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sender = db.Column(db.String(100), nullable=False)
@@ -19,11 +21,11 @@ class ChatMessage(db.Model):
     likes = db.Column(db.Integer, default=0)
     dislikes = db.Column(db.Integer, default=0)
 
-# Création des tables SQLite au démarrage
+# 4. Création automatique des tables
 with app.app_context():
     db.create_all()
 
-# --- ROUTES DE NAVIGATION ---
+# --- ROUTES HTML ---
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -48,9 +50,7 @@ def contact():
 def admin_chat():
     return render_template('admin_chat.html')
 
-# --- ROUTES API (CHAT EN DIRECT) ---
-
-# 1. Récupérer tous les messages avec Jour + Heure
+# --- API CHAT (MESSAGES, LIKES, DISLIKES, SUPPRESSION) ---
 @app.route('/api/get_messages', methods=['GET'])
 def get_messages():
     messages = ChatMessage.query.order_by(ChatMessage.timestamp.asc()).all()
@@ -66,7 +66,6 @@ def get_messages():
         })
     return jsonify(output)
 
-# 2. Envoyer un message (Visiteur ou Admin)
 @app.route('/api/send_message', methods=['POST'])
 def send_message():
     data = request.get_json()
@@ -81,7 +80,6 @@ def send_message():
     db.session.commit()
     return jsonify({'status': 'success'})
 
-# 3. Aimer un message (+1 Like)
 @app.route('/api/like_message/<int:msg_id>', methods=['POST'])
 def like_message(msg_id):
     msg = ChatMessage.query.get_or_404(msg_id)
@@ -89,7 +87,6 @@ def like_message(msg_id):
     db.session.commit()
     return jsonify({'status': 'success', 'likes': msg.likes})
 
-# 4. Ne pas aimer un message (+1 Dislike)
 @app.route('/api/dislike_message/<int:msg_id>', methods=['POST'])
 def dislike_message(msg_id):
     msg = ChatMessage.query.get_or_404(msg_id)
@@ -97,7 +94,6 @@ def dislike_message(msg_id):
     db.session.commit()
     return jsonify({'status': 'success', 'dislikes': msg.dislikes})
 
-# 5. Supprimer un message (Admin)
 @app.route('/api/delete_message/<int:msg_id>', methods=['DELETE'])
 def delete_message(msg_id):
     msg = ChatMessage.query.get_or_404(msg_id)
@@ -105,6 +101,5 @@ def delete_message(msg_id):
     db.session.commit()
     return jsonify({'status': 'success'})
 
-# --- DÉMARRAGE DU SERVEUR ---
 if __name__ == '__main__':
     app.run(debug=True)
