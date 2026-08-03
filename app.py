@@ -1,51 +1,42 @@
-import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'votre_cle_secrete_ici'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chat.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# --- INITIALISATION DE LA BASE DE DONNÉES ---
-def init_db():
-    conn = sqlite3.connect('chat_database.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS messages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            sender TEXT NOT NULL,
-            message TEXT NOT NULL,
-            datetime_str TEXT NOT NULL,
-            likes INTEGER DEFAULT 0,
-            dislikes INTEGER DEFAULT 0
-        )
-    ''')
-    conn.commit()
-    conn.close()
+db = SQLAlchemy(app)
 
-# Création de la table au démarrage local
-init_db()
+# --- MODÈLE DE BASE DE DONNÉES ---
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    auteur = db.Column(db.String(100), nullable=False)
+    contenu = db.Column(db.Text, nullable=False)
+    date_creation = db.Column(db.DateTime, default=datetime.utcnow)
+    likes = db.Column(db.Integer, default=0)
+    dislikes = db.Column(db.Integer, default=0)
+    
+    # ID du message auquel on répond (None s'il s'agit d'un message principal)
+    parent_id = db.Column(db.Integer, db.ForeignKey('message.id'), nullable=True)
+    
+    # Relation d'imbrication pour récupérer les réponses
+    reponses = db.relationship('Message', backref=db.backref('parent', remote_side=[id]), cascade="all, delete-orphan")
 
+# Création des tables
+with app.app_context():
+    db.create_all()
 
-# --- ROUTES HTML POUR LES PAGES ---
+# --- ROUTES ---
 
 @app.route('/')
-@app.route('/index')
-def page_accueil():
+def home():
     return render_template('index.html')
-
-@app.route('/contact')
-@app.route('/contact.html')
-def page_contact():
-    return render_template('contact.html')
-
-@app.route('/admin/chat')
-@app.route('/admin_chat')
-@app.route('/admin_chat.html')
-def page_admin_chat():
-    return render_template('admin_chat.html')
 
 @app.route('/a-propos')
 def a_propos():
-    return render_template('a-propos.html')
+    return render_template('a_propos.html')
 
 @app.route('/formations')
 def formations():
@@ -55,94 +46,53 @@ def formations():
 def actualites():
     return render_template('actualites.html')
 
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
 
-# --- API DU TCHAT ---
-
-# 1. Récupérer les messages
-@app.route('/api/get_messages', methods=['GET'])
-def get_messages():
-    try:
-        conn = sqlite3.connect('chat_database.db')
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM messages ORDER BY id ASC')
-        rows = cursor.fetchall()
-        conn.close()
-        
-        messages = [dict(row) for row in rows]
-        return jsonify(messages), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-# 2. Envoyer un message
-@app.route('/api/send_message', methods=['POST'])
-def send_message():
-    try:
-        data = request.json
-        sender = data.get('sender', 'Visiteur').strip() or 'Visiteur'
-        message = data.get('message', '').strip()
-        
-        if not message:
-            return jsonify({'error': 'Message vide'}), 400
+# Route du Chat Public
+@app.route('/chat', methods=['GET', 'POST'])
+def chat():
+    if request.method == 'POST':
+        auteur = request.form.get('auteur')
+        contenu = request.form.get('contenu')
+        if auteur and contenu:
+            nouveau_message = Message(auteur=auteur, contenu=contenu)
+            db.session.add(nouveau_message)
+            db.session.commit()
+            return redirect(url_for('chat'))
             
-        datetime_str = datetime.now().strftime('%d/%m/%Y à %H:%M')
-        
-        conn = sqlite3.connect('chat_database.db')
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO messages (sender, message, datetime_str, likes, dislikes)
-            VALUES (?, ?, ?, 0, 0)
-        ''', (sender, message, datetime_str))
-        conn.commit()
-        conn.close()
-        
-        return jsonify({'success': True}), 201
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    # On récupère uniquement les messages principaux (pas les réponses isolées)
+    messages = Message.query.filter_by(parent_id=None).order_by(Message.date_creation.desc()).all()
+    return render_template('chat.html', messages=messages)
 
-# 3. Supprimer un message (RÉSERVÉ À L'ADMINISTRATION)
-@app.route('/api/delete_message/<int:msg_id>', methods=['DELETE'])
-def delete_message(msg_id):
-    try:
-        conn = sqlite3.connect('chat_database.db')
-        cursor = conn.cursor()
-        cursor.execute('DELETE FROM messages WHERE id = ?', (msg_id,))
-        conn.commit()
-        conn.close()
-        return jsonify({'success': True}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+# Route du Panneau d'Administration / Modération
+@app.route('/admin')
+def admin_panel():
+    messages = Message.query.filter_by(parent_id=None).order_by(Message.date_creation.desc()).all()
+    return render_template('admin.html', messages=messages)
 
-# 4. Reaction : Like
-@app.route('/api/like_message/<int:msg_id>', methods=['POST'])
-def like_message(msg_id):
-    try:
-        conn = sqlite3.connect('chat_database.db')
-        cursor = conn.cursor()
-        cursor.execute('UPDATE messages SET likes = likes + 1 WHERE id = ?', (msg_id,))
-        conn.commit()
-        conn.close()
-        return jsonify({'success': True}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+# Route pour Répondre directement à un message (Admin)
+@app.route('/repondre/<int:message_id>', methods=['POST'])
+def repondre(message_id):
+    contenu = request.form.get('contenu')
+    if contenu:
+        nouvelle_reponse = Message(
+            auteur="Administrateur",
+            contenu=contenu,
+            parent_id=message_id
+        )
+        db.session.add(nouvelle_reponse)
+        db.session.commit()
+    return redirect(url_for('admin_panel'))
 
-# 5. Reaction : Dislike
-@app.route('/api/dislike_message/<int:msg_id>', methods=['POST'])
-def dislike_message(msg_id):
-    try:
-        conn = sqlite3.connect('chat_database.db')
-        cursor = conn.cursor()
-        cursor.execute('UPDATE messages SET dislikes = dislikes + 1 WHERE id = ?', (msg_id,))
-        conn.commit()
-        conn.close()
-        return jsonify({'success': True}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+# Route de Suppression d'un message
+@app.route('/supprimer/<int:id>')
+def supprimer(id):
+    msg = Message.query.get_or_404(id)
+    db.session.delete(msg)
+    db.session.commit()
+    return redirect(url_for('admin_panel'))
 
-
-# --- LANCEMENT DU SERVEUR ---
 if __name__ == '__main__':
     app.run(debug=True)
-else:
-    # S'assure que la base de données est initialisée lors d'un déploiement avec Gunicorn / Render
-    init_db()
