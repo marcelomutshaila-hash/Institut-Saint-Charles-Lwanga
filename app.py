@@ -21,7 +21,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-# Exécution obligatoire au démarrage
+# Création de la table au démarrage local
 init_db()
 
 
@@ -42,6 +42,18 @@ def page_contact():
 @app.route('/admin_chat.html')
 def page_admin_chat():
     return render_template('admin_chat.html')
+
+@app.route('/a-propos')
+def a_propos():
+    return render_template('a_propos.html')
+
+@app.route('/formations')
+def formations():
+    return render_template('formations.html')
+
+@app.route('/actualites')
+def actualites():
+    return render_template('actualites.html')
 
 
 # --- API DU TCHAT ---
@@ -88,7 +100,7 @@ def send_message():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# 3. Supprimer un message (RESERVÉ À L'ADMINISTRATION)
+# 3. Supprimer un message (RÉSERVÉ À L'ADMINISTRATION)
 @app.route('/api/delete_message/<int:msg_id>', methods=['DELETE'])
 def delete_message(msg_id):
     try:
@@ -127,5 +139,10 @@ def dislike_message(msg_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
+# --- LANCEMENT DU SERVEUR ---
 if __name__ == '__main__':
     app.run(debug=True)
+else:
+    # S'assure que la base de données est initialisée lors d'un déploiement avec Gunicorn / Render
+    init_db()
