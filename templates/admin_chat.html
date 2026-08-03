@@ -1,141 +1,90 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Espace Modération Admin - Institut Saint Charles Lwanga</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f7fafc; padding: 20px; color: #2d3748; }
-        .admin-card { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        h1 { color: #1a365d; text-align: center; font-size: 22px; margin-top: 0; margin-bottom: 20px; }
-        .chat-messages { min-height: 250px; max-height: 450px; overflow-y: auto; margin-bottom: 20px; padding-right: 5px; }
-        .input-group { margin-bottom: 12px; }
-        .input-group input, .input-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
-        .send-btn { background-color: #1a365d; color: white; border: none; padding: 12px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .send-btn:hover { background-color: #0d47a1; }
-    </style>
-</head>
-<body>
+import sqlite3
+from datetime import datetime
+from flask import Flask, render_template, request, jsonify
 
-<div class="admin-card">
-    <h1>🛡️ Panneau des Réponses Administrateur</h1>
+app = Flask(__name__)
+
+# Initialisation de la base de données
+def init_db():
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            sender TEXT,
+            message TEXT,
+            datetime_str TEXT,
+            likes INTEGER DEFAULT 0,
+            dislikes INTEGER DEFAULT 0
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+init_db()
+
+# Route pour récupérer les messages
+@app.route('/api/get_messages')
+def get_messages():
+    conn = sqlite3.connect('database.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM messages ORDER BY id DESC')
+    rows = cursor.fetchall()
+    conn.close()
     
-    <!-- Zone d'affichage des messages -->
-    <div class="chat-messages" id="zone-chat-messages">
-        <!-- Les messages s'afficheront ici -->
-    </div>
+    messages = [dict(row) for row in rows]
+    return jsonify(messages)
 
-    <!-- Zone d'envoi Admin -->
-    <div class="input-group">
-        <input type="text" id="adminSender" value="Administrateur" readonly style="background-color: #edf2f7; font-weight: bold; color: #1a365d;">
-    </div>
-    <div class="input-group">
-        <textarea id="adminMessage" rows="2" placeholder="Répondre aux élèves / parents..."></textarea>
-    </div>
-    <button class="send-btn" onclick="envoyerMessageAdmin()">
-        Publier comme Administrateur <i class="fas fa-paper-plane"></i>
-    </button>
-</div>
-
-<script>
-    // 1. CHARGEMENT DES MESSAGES
-    async function chargerMessagesAdmin() {
-        try {
-            const response = await fetch('/api/get_messages?t=' + new Date().getTime());
-            const messages = await response.json();
-            
-            const zone = document.getElementById('zone-chat-messages');
-            if (!zone) return;
-            
-            zone.innerHTML = '';
-
-            messages.forEach(msg => {
-                const div = document.createElement('div');
-                div.style.backgroundColor = '#1a365d';
-                div.style.color = '#ffffff';
-                div.style.borderRadius = '10px';
-                div.style.padding = '12px 15px';
-                div.style.marginBottom = '12px';
-                div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.15)';
-
-                const estAdmin = msg.sender && msg.sender.toLowerCase().includes('admin');
-                const badgeAdmin = estAdmin ? '<span style="background-color: #f6ad55; color: #1a365d; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; margin-left: 8px;">ADMIN</span>' : '';
-
-                div.innerHTML = `
-                    <div style="font-weight: bold; font-size: 14px; color: #f6ad55; margin-bottom: 5px; display: flex; align-items: center;">
-                        ${msg.sender || 'Visiteur'} ${badgeAdmin}
-                    </div>
-                    
-                    <div style="font-size: 15px; color: #ffffff; line-height: 1.4; margin-bottom: 8px;">
-                        ${msg.message}
-                    </div>
-                    
-                    <div style="text-align: right; font-size: 11px; color: #cbd5e0; margin-bottom: 8px;">
-                        ${msg.datetime_str || ''}
-                    </div>
-
-                    <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.2); margin: 6px 0;">
-                    
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-top: 6px;">
-                        <span>👍 ${msg.likes || 0} | 👎 ${msg.dislikes || 0}</span>
-                        <!-- BOUTON SUPPRIMER RESERVÉ À L'ADMIN -->
-                        <button onclick="supprimerMessage(${msg.id})" style="background: #fc8181; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">
-                            🗑️ Supprimer
-                        </button>
-                    </div>
-                `;
-                zone.appendChild(div);
-            });
-        } catch (e) { 
-            console.error("Erreur de chargement Admin:", e); 
-        }
-    }
-
-    // 2. ENVOI DE MESSAGE DEPUIS L'ADMIN
-    async function envoyerMessageAdmin() {
-        const messageInput = document.getElementById('adminMessage');
-        const message = messageInput ? messageInput.value.trim() : '';
+# Route pour envoyer un message
+@app.route('/api/send_message', methods=['POST'])
+def send_message():
+    data = request.json
+    sender = data.get('sender', 'Visiteur')
+    message = data.get('message', '')
+    
+    if not message.strip():
+        return jsonify({'error': 'Message vide'}), 400
         
-        if (!message) {
-            alert("Veuillez écrire un message.");
-            return;
-        }
+    datetime_str = datetime.now().strftime('%d/%m/%Y à %H:%M')
+    
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO messages (sender, message, datetime_str, likes, dislikes)
+        VALUES (?, ?, ?, 0, 0)
+    ''', (sender, message, datetime_str))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True})
 
-        try {
-            const response = await fetch('/api/send_message', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sender: 'Administrateur', message: message })
-            });
+# Route pour supprimer un message (Réservé Admin)
+@app.route('/api/delete_message/<int:msg_id>', methods=['DELETE'])
+def delete_message(msg_id):
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM messages WHERE id = ?', (msg_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
 
-            if (response.ok) {
-                messageInput.value = '';
-                chargerMessagesAdmin();
-            } else {
-                alert("Erreur lors de l'envoi.");
-            }
-        } catch (e) {
-            console.error("Erreur d'envoi Admin:", e);
-        }
-    }
+# Route pour les Likes
+@app.route('/api/like_message/<int:msg_id>', methods=['POST'])
+def like_message(msg_id):
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute('UPDATE messages SET likes = likes + 1 WHERE id = ?', (msg_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
 
-    // 3. SUPPRESSION DU MESSAGE
-    async function supprimerMessage(id) {
-        if (confirm("Voulez-vous vraiment supprimer ce message ?")) {
-            try {
-                await fetch(`/api/delete_message/${id}`, { method: 'DELETE' });
-                chargerMessagesAdmin();
-            } catch (e) {
-                console.error("Erreur de suppression:", e);
-            }
-        }
-    }
-
-    // Actualisation automatique toutes les 3 secondes
-    setInterval(chargerMessagesAdmin, 3000);
-    chargerMessagesAdmin();
-</script>
-
-</body>
-</html>
+# Route pour les Dislikes
+@app.route('/api/dislike_message/<int:msg_id>', methods=['POST'])
+def dislike_message(msg_id):
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute('UPDATE messages SET dislikes = dislikes + 1 WHERE id = ?', (msg_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
