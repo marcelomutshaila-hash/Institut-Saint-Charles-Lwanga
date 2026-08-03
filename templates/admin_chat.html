@@ -3,277 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administration Chat - Institut Saint Charles Lwanga</title>
+    <title>Espace Modération Admin - Institut Saint Charles Lwanga</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        :root {
-            --primary-color: #1a237e;
-            --accent-color: #f57c00;
-            --bg-chat: #eceff1;
-            --admin-msg: #1a237e;
-            --user-msg: #ffffff;
-            --white: #ffffff;
-            --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: var(--font); background-color: #f0f2f5; display: flex; flex-direction: column; height: 100vh; }
-
-        /* EN-TÊTE ADMIN */
-        header {
-            background: var(--primary-color);
-            color: var(--white);
-            padding: 15px 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        }
-        header h1 { font-size: 1.2rem; font-weight: bold; }
-        header span { background: #2e7d32; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
-
-        /* ESPACE CHAT */
-        .chat-container {
-            flex: 1;
-            padding: 15px 5%;
-            background: var(--bg-chat);
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .bubble {
-            max-width: 80%;
-            padding: 10px 14px;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            position: relative;
-            word-wrap: break-word;
-        }
-        .bubble.visiteur {
-            background: var(--user-msg);
-            align-self: flex-start;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-            border-bottom-left-radius: 2px;
-        }
-        .bubble.admin {
-            background: var(--admin-msg);
-            color: var(--white);
-            align-self: flex-end;
-            border-bottom-right-radius: 2px;
-        }
-
-        .sender { font-size: 0.75rem; font-weight: bold; margin-bottom: 2px; }
-        .bubble.visiteur .sender { color: var(--primary-color); }
-        .bubble.admin .sender { color: #ffb74d; }
-
-        .time { font-size: 0.68rem; margin-top: 4px; display: block; text-align: right; }
-        .bubble.visiteur .time { color: #888; }
-        .bubble.admin .time { color: #b0bec5; }
-
-        /* ZONE SAISIE */
-        .chat-input {
-            display: flex;
-            padding: 12px 5%;
-            background: var(--white);
-            border-top: 1px solid #ccc;
-            gap: 10px;
-        }
-        .chat-input input[type="text"] {
-            flex: 1;
-            padding: 12px 15px;
-            border: 1px solid #ccc;
-            border-radius: 20px;
-            outline: none;
-            font-size: 0.95rem;
-        }
-        .chat-input button {
-            background: var(--accent-color);
-            color: var(--white);
-            border: none;
-            padding: 0 22px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .chat-input button:hover { background: #e65100; }
-
-        @media (max-width: 600px) {
-            header h1 { font-size: 1rem; }
-            .chat-container { padding: 12px 3%; }
-            .chat-input { padding: 10px 3%; }
-            .bubble { max-width: 90%; }
-        }
-
-        .logo a {
-    display: flex;
-    align-items: center;
-    gap: 12px; /* Espace entre le logo et le texte */
-    text-decoration: none;
-}
-
-.logo img {
-    height: 45px; /* Ajustez la hauteur selon la taille souhaitée */
-    width: auto;  /* Conserve les proportions du logo */
-    object-fit: contain;
-}
-
-.logo h1 {
-    color: var(--primary-color);
-    font-size: 1.2rem;
-    font-weight: 700;
-}
-
-/* Adaptation pour très petits téléphones */
-@media (max-width: 480px) {
-    .logo img {
-        height: 35px; /* Logo légèrement plus petit sur mobile */
-    }
-    .logo h1 {
-        font-size: 1rem; /* Texte un peu plus petit sur mobile */
-    }
-}
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f7fafc; padding: 20px; }
+        .admin-card { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h1 { color: #1a365d; text-align: center; font-size: 22px; }
+        .chat-messages { height: 450px; overflow-y: auto; margin-bottom: 20px; }
+        .send-btn { background: #0d47a1; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
+        .input-group { margin-bottom: 10px; }
+        .input-group input, .input-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 8px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo">
-    <a href="index.html">
-      <img src="../static/images/logo.png" alt="institut saint charles lwanga">
-        <h1>Institut Saint Charles Lwanga</h1>
-    </a>
-        </div>
-    </header>
+<div class="admin-card">
+    <h1>🛡️ Panneau de Modération du Chat</h1>
+    
+    <div class="chat-messages" id="zone-admin-messages"></div>
 
-    <div class="chat-container" id="chat-box"></div>
-
-    <div class="chat-input">
-        <input type="text" id="message-input" placeholder="Répondre aux visiteurs...">
-        <button onclick="sendMessage()">Envoyer</button>
+    <!-- ZONE D'ENVOI ADMIN -->
+    <div class="input-group">
+        <input type="text" id="adminSender" value="Administrateur" readonly style="background: #edf2f7; font-weight: bold;">
     </div>
+    <div class="input-group">
+        <textarea id="adminMessage" rows="2" placeholder="Répondre aux élèves / parents..."></textarea>
+    </div>
+    <button class="send-btn" onclick="envoyerMessageAdmin()">Publier comme Administrateur <i class="fas fa-paper-plane"></i></button>
+</div>
 
-    <script>
-        async function fetchMessages() {
-            try {
-                const res = await fetch('/api/get_messages');
-                const data = await res.json();
-                const chatBox = document.getElementById('chat-box');
+<script>
+    async function chargerMessagesAdmin() {
+        try {
+            const response = await fetch('/api/get_messages?t=' + new Date().getTime());
+            const messages = await response.json();
+            const zone = document.getElementById('zone-admin-messages');
+            zone.innerHTML = '';
 
-                const isAtBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 60;
+            messages.forEach(msg => {
+                const div = document.createElement('div');
+                div.style.backgroundColor = '#1a365d';
+                div.style.color = '#ffffff';
+                div.style.borderRadius = '10px';
+                div.style.padding = '12px 15px';
+                div.style.marginBottom = '12px';
 
-                chatBox.innerHTML = '';
-                data.forEach(msg => {
-                    const bubble = document.createElement('div');
-                    bubble.className = `bubble ${msg.expediteur}`;
-
-                    const senderName = msg.expediteur === 'admin' ? 'Vous (Admin)' : msg.sender_name;
-
-                    bubble.innerHTML = `
-                        <div class="sender">${senderName}</div>
-                        <div>${msg.message}</div>
-                        <span class="time">${msg.time}</span>
-                    `;
-                    chatBox.appendChild(bubble);
-                });
-
-                if (isAtBottom) chatBox.scrollTop = chatBox.scrollHeight;
-            } catch (err) { console.error("Erreur admin fetch", err); }
-        }
-
-        async function sendMessage() {
-            const input = document.getElementById('message-input');
-            const text = input.value.trim();
-
-            if (text) {
-                await fetch('/api/send_message', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sender_name: 'Admin', message: text, expediteur: 'admin' })
-                });
-                input.value = '';
-                fetchMessages();
-            }
-        }
-
-        document.getElementById('message-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-
-        fetchMessages();
-        setInterval(fetchMessages, 2000);
-
-     async function chargerTousLesMessages() {
-    try {
-        const response = await fetch('/api/get_messages');
-        const messages = await response.json();
-        
-        const zoneChat = document.getElementById('zone-chat-messages');
-        zoneChat.innerHTML = ''; 
-
-        messages.forEach(msg => {
-            const div = document.createElement('div');
-            
-            // Style uniforme bleu pour TOUS les messages
-            div.style.backgroundColor = '#1a365d';
-            div.style.color = '#ffffff';
-            div.style.borderRadius = '12px';
-            div.style.padding = '12px 16px';
-            div.style.marginBottom = '12px';
-            div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.15)';
-            
-            const nomExpediteur = msg.sender || 'Anonyme';
-            const dateHeure = msg.datetime_str || '';
-
-            div.innerHTML = `
-                <!-- En-tête : Nom de l'expéditeur -->
-                <div style="font-weight: bold; font-size: 14px; margin-bottom: 6px; color: #f6ad55;">
-                    ${nomExpediteur}
-                </div>
-                
-                <!-- Corps du message -->
-                <div style="font-size: 15px; line-height: 1.4; margin-bottom: 8px; color: #ffffff;">
-                    ${msg.message}
-                </div>
-                
-                <!-- Horodatage (aligné à droite) -->
-                <div style="text-align: right; font-size: 11px; opacity: 0.8; color: #e2e8f0; margin-bottom: 8px;">
-                    ${dateHeure}
-                </div>
-
-                <!-- Séparateur discret -->
-                <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.2); margin: 6px 0;">
-
-                <!-- Boutons d'action (Likes, Dislikes, Supprimer) -->
-                <div style="display: flex; gap: 15px; align-items: center; font-size: 13px; margin-top: 6px;">
-                    <button onclick="aimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #ffffff;">
-                        👍 <span>${msg.likes}</span>
-                    </button>
-                    <button onclick="pasAimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #ffffff;">
-                        👎 <span>${msg.dislikes}</span>
-                    </button>
-                    <button onclick="supprimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #fc8181; margin-left: auto;">
-                        🗑️ Supprimer
-                    </button>
-                </div>
-            `;
-            
-            zoneChat.appendChild(div);
-        });
-
-        // Dérouler automatique vers le bas
-        zoneChat.scrollTop = zoneChat.scrollHeight;
-
-    } catch (error) {
-        console.error("Erreur de chargement :", error);
+                div.innerHTML = `
+                    <div style="font-weight: bold; color: #f6ad55;">${msg.sender || 'Visiteur'}</div>
+                    <div style="margin: 8px 0; font-size: 15px;">${msg.message}</div>
+                    <div style="text-align: right; font-size: 11px; color: #cbd5e0;">${msg.datetime_str || ''}</div>
+                    <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.2); margin: 6px 0;">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                        <span>👍 ${msg.likes || 0} | 👎 ${msg.dislikes || 0}</span>
+                        <!-- BOUTON SUPPRIMER UNIQUEMENT POUR L'ADMIN -->
+                        <button onclick="supprimerMessage(${msg.id})" style="background: #fc8181; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                            🗑️ Supprimer ce message
+                        </button>
+                    </div>
+                `;
+                zone.appendChild(div);
+            });
+        } catch (e) { console.error(e); }
     }
-}
 
-// Actualisation automatique toutes les 3 secondes
-setInterval(chargerTousLesMessages, 3000);
-chargerTousLesMessages();
-    </script>
+    async function envoyerMessageAdmin() {
+        const message = document.getElementById('adminMessage').value.trim();
+        if (!message) return;
+
+        await fetch('/api/send_message', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sender: 'Administrateur', message: message })
+        });
+
+        document.getElementById('adminMessage').value = '';
+        chargerMessagesAdmin();
+    }
+
+    async function supprimerMessage(id) {
+        if (confirm("Voulez-vous vraiment supprimer définitivement ce message ?")) {
+            await fetch(`/api/delete_message/${id}`, { method: 'DELETE' });
+            chargerMessagesAdmin();
+        }
+    }
+
+    setInterval(chargerMessagesAdmin, 3000);
+    chargerMessagesAdmin();
+</script>
+
 </body>
 </html>
