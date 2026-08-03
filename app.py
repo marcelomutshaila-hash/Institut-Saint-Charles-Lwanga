@@ -45,7 +45,7 @@ def page_admin_chat():
 
 @app.route('/a-propos')
 def a_propos():
-    return render_template('a_propos.html')
+    return render_template('a-propos.html')
 
 @app.route('/formations')
 def formations():
