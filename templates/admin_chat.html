@@ -6,38 +6,48 @@
     <title>Espace Modération Admin - Institut Saint Charles Lwanga</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f7fafc; padding: 20px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f7fafc; padding: 20px; color: #2d3748; }
         .admin-card { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        h1 { color: #1a365d; text-align: center; font-size: 22px; }
-        .chat-messages { height: 450px; overflow-y: auto; margin-bottom: 20px; }
-        .send-btn { background: #0d47a1; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
-        .input-group { margin-bottom: 10px; }
-        .input-group input, .input-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 8px; box-sizing: border-box; }
+        h1 { color: #1a365d; text-align: center; font-size: 22px; margin-top: 0; margin-bottom: 20px; }
+        .chat-messages { min-height: 250px; max-height: 450px; overflow-y: auto; margin-bottom: 20px; padding-right: 5px; }
+        .input-group { margin-bottom: 12px; }
+        .input-group input, .input-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+        .send-btn { background-color: #1a365d; color: white; border: none; padding: 12px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .send-btn:hover { background-color: #0d47a1; }
     </style>
 </head>
 <body>
 
 <div class="admin-card">
-    <h1>🛡️ Panneau de Modération du Chat</h1>
+    <h1>🛡️ Panneau des Réponses Administrateur</h1>
     
-    <div class="chat-messages" id="zone-admin-messages"></div>
+    <!-- Zone d'affichage des messages -->
+    <div class="chat-messages" id="zone-chat-messages">
+        <!-- Les messages s'afficheront ici -->
+    </div>
 
-    <!-- ZONE D'ENVOI ADMIN -->
+    <!-- Zone d'envoi Admin -->
     <div class="input-group">
-        <input type="text" id="adminSender" value="Administrateur" readonly style="background: #edf2f7; font-weight: bold;">
+        <input type="text" id="adminSender" value="Administrateur" readonly style="background-color: #edf2f7; font-weight: bold; color: #1a365d;">
     </div>
     <div class="input-group">
         <textarea id="adminMessage" rows="2" placeholder="Répondre aux élèves / parents..."></textarea>
     </div>
-    <button class="send-btn" onclick="envoyerMessageAdmin()">Publier comme Administrateur <i class="fas fa-paper-plane"></i></button>
+    <button class="send-btn" onclick="envoyerMessageAdmin()">
+        Publier comme Administrateur <i class="fas fa-paper-plane"></i>
+    </button>
 </div>
 
 <script>
+    // 1. CHARGEMENT DES MESSAGES
     async function chargerMessagesAdmin() {
         try {
             const response = await fetch('/api/get_messages?t=' + new Date().getTime());
             const messages = await response.json();
-            const zone = document.getElementById('zone-admin-messages');
+            
+            const zone = document.getElementById('zone-chat-messages');
+            if (!zone) return;
+            
             zone.innerHTML = '';
 
             messages.forEach(msg => {
@@ -47,47 +57,82 @@
                 div.style.borderRadius = '10px';
                 div.style.padding = '12px 15px';
                 div.style.marginBottom = '12px';
+                div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.15)';
+
+                const estAdmin = msg.sender && msg.sender.toLowerCase().includes('admin');
+                const badgeAdmin = estAdmin ? '<span style="background-color: #f6ad55; color: #1a365d; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; margin-left: 8px;">ADMIN</span>' : '';
 
                 div.innerHTML = `
-                    <div style="font-weight: bold; color: #f6ad55;">${msg.sender || 'Visiteur'}</div>
-                    <div style="margin: 8px 0; font-size: 15px;">${msg.message}</div>
-                    <div style="text-align: right; font-size: 11px; color: #cbd5e0;">${msg.datetime_str || ''}</div>
-                    <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.2); margin: 6px 0;">
+                    <div style="font-weight: bold; font-size: 14px; color: #f6ad55; margin-bottom: 5px; display: flex; align-items: center;">
+                        ${msg.sender || 'Visiteur'} ${badgeAdmin}
+                    </div>
                     
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                    <div style="font-size: 15px; color: #ffffff; line-height: 1.4; margin-bottom: 8px;">
+                        ${msg.message}
+                    </div>
+                    
+                    <div style="text-align: right; font-size: 11px; color: #cbd5e0; margin-bottom: 8px;">
+                        ${msg.datetime_str || ''}
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.2); margin: 6px 0;">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-top: 6px;">
                         <span>👍 ${msg.likes || 0} | 👎 ${msg.dislikes || 0}</span>
-                        <!-- BOUTON SUPPRIMER UNIQUEMENT POUR L'ADMIN -->
-                        <button onclick="supprimerMessage(${msg.id})" style="background: #fc8181; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                            🗑️ Supprimer ce message
+                        <!-- BOUTON SUPPRIMER RESERVÉ À L'ADMIN -->
+                        <button onclick="supprimerMessage(${msg.id})" style="background: #fc8181; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px;">
+                            🗑️ Supprimer
                         </button>
                     </div>
                 `;
                 zone.appendChild(div);
             });
-        } catch (e) { console.error(e); }
-    }
-
-    async function envoyerMessageAdmin() {
-        const message = document.getElementById('adminMessage').value.trim();
-        if (!message) return;
-
-        await fetch('/api/send_message', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sender: 'Administrateur', message: message })
-        });
-
-        document.getElementById('adminMessage').value = '';
-        chargerMessagesAdmin();
-    }
-
-    async function supprimerMessage(id) {
-        if (confirm("Voulez-vous vraiment supprimer définitivement ce message ?")) {
-            await fetch(`/api/delete_message/${id}`, { method: 'DELETE' });
-            chargerMessagesAdmin();
+        } catch (e) { 
+            console.error("Erreur de chargement Admin:", e); 
         }
     }
 
+    // 2. ENVOI DE MESSAGE DEPUIS L'ADMIN
+    async function envoyerMessageAdmin() {
+        const messageInput = document.getElementById('adminMessage');
+        const message = messageInput ? messageInput.value.trim() : '';
+        
+        if (!message) {
+            alert("Veuillez écrire un message.");
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/send_message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sender: 'Administrateur', message: message })
+            });
+
+            if (response.ok) {
+                messageInput.value = '';
+                chargerMessagesAdmin();
+            } else {
+                alert("Erreur lors de l'envoi.");
+            }
+        } catch (e) {
+            console.error("Erreur d'envoi Admin:", e);
+        }
+    }
+
+    // 3. SUPPRESSION DU MESSAGE
+    async function supprimerMessage(id) {
+        if (confirm("Voulez-vous vraiment supprimer ce message ?")) {
+            try {
+                await fetch(`/api/delete_message/${id}`, { method: 'DELETE' });
+                chargerMessagesAdmin();
+            } catch (e) {
+                console.error("Erreur de suppression:", e);
+            }
+        }
+    }
+
+    // Actualisation automatique toutes les 3 secondes
     setInterval(chargerMessagesAdmin, 3000);
     chargerMessagesAdmin();
 </script>
