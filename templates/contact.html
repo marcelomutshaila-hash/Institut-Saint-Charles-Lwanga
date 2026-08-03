@@ -3,18 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact & Espace de Discussion - Institut Saint Charles Lwanga</title>
+    <title>Contact - Institut Saint Charles Lwanga</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f7fafc; color: #2d3748; }
-        
-        /* HEADER & NAVIGATION */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f7fafc; color: #2d3748; }
         header { background-color: #ffffff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; }
         .nav-container { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; max-width: 1100px; margin: 0 auto; }
-        .logo-title { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #1a365d; font-weight: bold; font-size: 18px; }
-        .logo-title img { height: 40px; }
-        
-        /* Menu Hamburger Mobile */
+        .logo-title { text-decoration: none; color: #1a365d; font-weight: bold; font-size: 18px; }
         .menu-toggle { font-size: 24px; color: #1a365d; cursor: pointer; display: none; background: none; border: none; }
         .nav-links { display: flex; gap: 20px; list-style: none; margin: 0; padding: 0; }
         .nav-links a { text-decoration: none; color: #2d3748; font-weight: 500; }
@@ -26,90 +21,51 @@
             .nav-links li { text-align: center; padding: 10px 0; }
         }
 
-        /* BANNIÈRE & CONTENEURS */
-        .banner { background-color: #0d47a1; color: white; text-align: center; padding: 30px 20px; margin-bottom: 25px; }
-        .banner h1 { margin: 0; font-size: 24px; }
-        .container { max-width: 900px; margin: 0 auto; padding: 0 15px 40px 15px; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; border-left: 5px solid #0d47a1; }
-        
-        /* ESPACE DISCUSSION */
-        .chat-container { background: #f1f5f9; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .chat-messages { min-height: 200px; max-height: 400px; overflow-y: auto; padding-right: 5px; margin-bottom: 15px; }
-        .chat-input-zone { display: flex; flex-direction: column; gap: 10px; background: white; padding: 15px; border-radius: 10px; }
+        .container { max-width: 800px; margin: 30px auto; padding: 0 15px; }
+        .chat-container { background: #ffffff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .chat-messages { min-height: 250px; max-height: 450px; overflow-y: auto; margin-bottom: 20px; padding-right: 5px; }
+        .chat-input-zone { display: flex; flex-direction: column; gap: 12px; }
         .chat-input-zone input, .chat-input-zone textarea { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
-        .send-btn { background-color: #1a365d; color: white; border: none; padding: 12px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .send-btn { background-color: #1a365d; color: white; border: none; padding: 12px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; }
     </style>
 </head>
 <body>
 
-    <!-- NAVIGATION -->
     <header>
         <div class="nav-container">
-            <a href="/" class="logo-title">
-                <img src="/static/logo.png" alt="Logo" onerror="this.style.display='none'">
-                <span>Institut Saint Charles Lwanga</span>
-            </a>
-            <button class="menu-toggle" id="menuToggle">
-                <i class="fas fa-bars"></i>
-            </button>
+            <a href="/" class="logo-title">Institut Saint Charles Lwanga</a>
+            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
             <ul class="nav-links" id="navLinks">
                 <li><a href="/">Accueil</a></li>
-                <li><a href="/apropos">À Propos</a></li>
-                <li><a href="/formations">Formations</a></li>
-                <li><a href="/actualites">Actualités</a></li>
                 <li><a href="/contact">Contact</a></li>
             </ul>
         </div>
     </header>
 
-    <div class="banner">
-        <h1>Contact & Ecrivez-nous un message </h1>
-    </div>
-
     <div class="container">
-        <!-- COORDONNÉES -->
-        <div class="card">
-            <h2 style="color: #1a365d; margin-top:0;">Nos Coordonnées</h2>
-            <p><strong>Adresse :</strong> Avenue de Lubumbashi N°45, Quartier Moïse Tshombe, Kolwezi/RDC</p>
-            <p><strong>Téléphone & WhatsApp :</strong> +243 971 187 082</p>
-            <p><strong>Email :</strong> contact@institutsaintcharleslwanga.org</p>
-            <p><strong>Heures d'Ouverture :</strong> Lundi - Vendredi : 07h05 - 17h20</p>
-        </div>
-
-        <!-- TCHAT PUBLIC -->
         <div class="chat-container">
-            <h3 style="margin-top:0; color: #1a365d;">Discussion en direct</h3>
+            <h2 style="color: #1a365d; margin-top: 0;">Discussion en direct</h2>
             
-            <div class="chat-messages" id="zone-chat-messages">
-                <!-- Messages affichés dynamiquement -->
-            </div>
+            <div class="chat-messages" id="zone-chat-messages"></div>
 
             <div class="chat-input-zone">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <strong style="color:#1a365d; min-width: 50px;">Nom :</strong>
+                    <strong style="color:#1a365d;">Nom :</strong>
                     <input type="text" id="senderInput" placeholder="Votre nom..." value="Visiteur">
                 </div>
                 <textarea id="messageInput" rows="2" placeholder="Écrivez votre message..."></textarea>
-                <button class="send-btn" id="btnEnvoyer" onclick="envoyerMessage()">
-                    Envoyer <i class="fas fa-paper-plane"></i>
-                </button>
+                <button class="send-btn" onclick="envoyerMessage()">Envoyer <i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
 
-    <!-- SCRIPT JAVASCRIPT BLINDÉ -->
     <script>
-        // 1. MENU HAMBURGER MOBILE
+        // Menu Hamburger
         const menuToggle = document.getElementById('menuToggle');
         const navLinks = document.getElementById('navLinks');
+        if (menuToggle) menuToggle.onclick = () => navLinks.classList.toggle('active');
 
-        if (menuToggle && navLinks) {
-            menuToggle.onclick = function() {
-                navLinks.classList.toggle('active');
-            };
-        }
-
-        // 2. RECUPERER LES MESSAGES
+        // Charger les messages
         async function chargerTousLesMessages() {
             try {
                 const response = await fetch('/api/get_messages?t=' + new Date().getTime());
@@ -117,112 +73,59 @@
                 
                 const zoneChat = document.getElementById('zone-chat-messages');
                 if (!zoneChat) return;
-                
                 zoneChat.innerHTML = ''; 
 
-              messages.forEach(msg => {
-    const div = document.createElement('div');
-    
-    // Vérification si c'est un message administrateur
-    const estAdmin = msg.sender && (msg.sender.toLowerCase().includes('admin'));
-    
-    // Style du bloc (Bordure dorée si Admin)
-    div.style.backgroundColor = '#1a365d';
-    div.style.color = '#ffffff';
-    div.style.borderRadius = '10px';
-    div.style.padding = '12px 15px';
-    div.style.marginBottom = '12px';
-    div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.15)';
-    if (estAdmin) {
-        div.style.borderLeft = '6px solid #f6ad55'; // Ligne dorée pour l'Admin
-    }
-    
-    const nomExpediteur = msg.sender || 'Visiteur';
-    const dateHeure = msg.datetime_str || '';
+                messages.forEach(msg => {
+                    const div = document.createElement('div');
+                    const estAdmin = msg.sender && msg.sender.toLowerCase().includes('admin');
+                    
+                    div.style.backgroundColor = '#1a365d';
+                    div.style.color = '#ffffff';
+                    div.style.borderRadius = '10px';
+                    div.style.padding = '12px 15px';
+                    div.style.marginBottom = '12px';
+                    if (estAdmin) div.style.borderLeft = '6px solid #f6ad55';
 
-    // Badge spécial pour l'Administrateur
-    const badgeAdmin = estAdmin ? '<span style="background-color: #f6ad55; color: #1a365d; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; margin-left: 8px;">ADMIN</span>' : '';
+                    const badgeAdmin = estAdmin ? '<span style="background-color: #f6ad55; color: #1a365d; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; margin-left: 8px;">ADMIN</span>' : '';
 
-    div.innerHTML = `
-        <div style="font-weight: bold; font-size: 14px; color: #f6ad55; margin-bottom: 5px; display: flex; align-items: center;">
-            ${nomExpediteur} ${badgeAdmin}
-        </div>
-        
-        <div style="font-size: 15px; color: #ffffff; line-height: 1.4; margin-bottom: 8px;">
-            ${msg.message}
-        </div>
-        
-        <div style="text-align: right; font-size: 11px; color: #cbd5e0; margin-bottom: 8px;">
-            ${dateHeure}
-        </div>
-
-        <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.2); margin: 6px 0;">
-
-        <div style="display: flex; gap: 15px; align-items: center; font-size: 13px; margin-top: 6px;">
-            <button onclick="aimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #ffffff;">
-                👍 <span>${msg.likes || 0}</span>
-            </button>
-            <button onclick="pasAimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #ffffff;">
-                👎 <span>${msg.dislikes || 0}</span>
-            </button>
-        </div>
-    `;
-    
-    zoneChat.appendChild(div);
-});
-
-            } catch (error) {
-                console.error("Erreur de chargement :", error);
-            }
-        }
-
-        // 3. ENVOYER UN MESSAGE
-        async function envoyerMessage() {
-            const senderField = document.getElementById('senderInput');
-            const messageField = document.getElementById('messageInput');
-
-            const sender = senderField ? senderField.value.trim() : 'Visiteur';
-            const message = messageField ? messageField.value.trim() : '';
-
-            if (!message) {
-                alert("Veuillez saisir un message.");
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/send_message', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sender: sender, message: message })
+                    div.innerHTML = `
+                        <div style="font-weight: bold; font-size: 14px; color: #f6ad55; margin-bottom: 5px; display: flex; align-items: center;">
+                            ${msg.sender || 'Visiteur'} ${badgeAdmin}
+                        </div>
+                        <div style="font-size: 15px; color: #ffffff; margin-bottom: 8px;">${msg.message}</div>
+                        <div style="text-align: right; font-size: 11px; color: #cbd5e0;">${msg.datetime_str || ''}</div>
+                        <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.2); margin: 6px 0;">
+                        <div style="display: flex; gap: 15px; align-items: center; font-size: 13px;">
+                            <button onclick="aimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #ffffff;">👍 <span>${msg.likes || 0}</span></button>
+                            <button onclick="pasAimerMessage(${msg.id})" style="border:none; background:none; cursor:pointer; color: #ffffff;">👎 <span>${msg.dislikes || 0}</span></button>
+                        </div>
+                    `;
+                    zoneChat.appendChild(div);
                 });
-
-                if (response.ok) {
-                    messageField.value = '';
-                    chargerTousLesMessages();
-                } else {
-                    alert("Erreur lors de l'envoi.");
-                }
-            } catch (error) {
-                console.error("Erreur d'envoi :", error);
-            }
+            } catch (error) { console.error("Erreur de chargement :", error); }
         }
 
-        // 4. RÉACTIONS (LIKES / DISLIKES)
-        async function aimerMessage(id) {
-            try {
-                await fetch(`/api/like_message/${id}`, { method: 'POST' });
-                chargerTousLesMessages();
-            } catch (e) { console.error(e); }
+        // Envoyer message
+        async function envoyerMessage() {
+            const sender = document.getElementById('senderInput').value.trim() || 'Visiteur';
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+
+            if (!message) return alert("Veuillez inscrire un message.");
+
+            await fetch('/api/send_message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sender: sender, message: message })
+            });
+
+            messageInput.value = '';
+            chargerTousLesMessages();
         }
 
-        async function pasAimerMessage(id) {
-            try {
-                await fetch(`/api/dislike_message/${id}`, { method: 'POST' });
-                chargerTousLesMessages();
-            } catch (e) { console.error(e); }
-        }
+        async function aimerMessage(id) { await fetch(`/api/like_message/${id}`, { method: 'POST' }); chargerTousLesMessages(); }
+        async function pasAimerMessage(id) { await fetch(`/api/dislike_message/${id}`, { method: 'POST' }); chargerTousLesMessages(); }
 
-        // Lancement
         setInterval(chargerTousLesMessages, 3000);
         chargerTousLesMessages();
     </script>
