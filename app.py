@@ -46,10 +46,24 @@ def formations():
 def actualites():
     return render_template('actualites.html')
 
-@app.route('/contact')
+# Route Contact (gère l'affichage ET l'envoi des messages)
+@app.route('/contact', methods=['GET', 'POST'])
 def contact():
-    return render_template('contact.html')
+    if request.method == 'POST':
+        auteur = request.form.get('auteur')
+        contenu = request.form.get('contenu')
+        
+        if auteur and contenu:
+            nouveau_message = Message(auteur=auteur, contenu=contenu)
+            db.session.add(nouveau_message)
+            db.session.commit()
+            flash("Votre message a été envoyé avec succès !", "success")
+            return redirect(url_for('contact'))
 
+    # Récupérer les messages principaux (sans parent_id) pour les afficher
+    messages = Message.query.filter_by(parent_id=None).order_by(Message.date_creation.desc()).all()
+    
+    return render_template('contact.html', messages=messages)
 # Route du Chat Public
 @app.route('/chat', methods=['GET', 'POST'])
 def chat():
