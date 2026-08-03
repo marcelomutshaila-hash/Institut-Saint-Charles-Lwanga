@@ -21,15 +21,25 @@ def init_db():
     conn.commit()
     conn.close()
 
-# Création de la table au démarrage
+# Exécution obligatoire au démarrage
 init_db()
 
-# --- ROUTES HTML ---
+
+# --- ROUTES HTML POUR LES PAGES ---
+
+@app.route('/')
+@app.route('/index')
+def page_accueil():
+    return render_template('index.html')
+
 @app.route('/contact')
+@app.route('/contact.html')
 def page_contact():
     return render_template('contact.html')
 
 @app.route('/admin/chat')
+@app.route('/admin_chat')
+@app.route('/admin_chat.html')
 def page_admin_chat():
     return render_template('admin_chat.html')
 
