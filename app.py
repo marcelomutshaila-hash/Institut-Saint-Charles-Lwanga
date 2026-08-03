@@ -1,105 +1,121 @@
-from flask import Flask, render_template, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
+import sqlite3
 from datetime import datetime
-import os
+from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-# 1. Configuration de la base de données
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# --- INITIALISATION DE LA BASE DE DONNÉES ---
+def init_db():
+    conn = sqlite3.connect('chat_database.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            sender TEXT NOT NULL,
+            message TEXT NOT NULL,
+            datetime_str TEXT NOT NULL,
+            likes INTEGER DEFAULT 0,
+            dislikes INTEGER DEFAULT 0
+        )
+    ''')
+    conn.commit()
+    conn.close()
 
-# 2. Initialisation de db (OBLIGATOIRE avant de créer les modèles)
-db = SQLAlchemy(app)
-
-# 3. Modèle de la base de données
-class ChatMessage(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    sender = db.Column(db.String(100), nullable=False)
-    message = db.Column(db.Text, nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    likes = db.Column(db.Integer, default=0)
-    dislikes = db.Column(db.Integer, default=0)
-
-# 4. Création automatique des tables
-with app.app_context():
-    db.create_all()
+# Création de la table au démarrage
+init_db()
 
 # --- ROUTES HTML ---
-@app.route('/')
-def home():
-    return render_template('index.html')
-
-@app.route('/apropos')
-def apropos():
-    return render_template('a-propos.html')
-
-@app.route('/formations')
-def formations():
-    return render_template('formations.html')
-
-@app.route('/actualites')
-def actualites():
-    return render_template('actualites.html')
-
 @app.route('/contact')
-def contact():
+def page_contact():
     return render_template('contact.html')
 
 @app.route('/admin/chat')
-def admin_chat():
+def page_admin_chat():
     return render_template('admin_chat.html')
 
-# --- API CHAT (MESSAGES, LIKES, DISLIKES, SUPPRESSION) ---
+
+# --- API DU TCHAT ---
+
+# 1. Récupérer les messages
 @app.route('/api/get_messages', methods=['GET'])
 def get_messages():
-    messages = ChatMessage.query.order_by(ChatMessage.timestamp.asc()).all()
-    output = []
-    for msg in messages:
-        output.append({
-            'id': msg.id,
-            'sender': msg.sender,
-            'message': msg.message,
-            'datetime_str': msg.timestamp.strftime('%d/%m/%Y à %H:%M') if msg.timestamp else '',
-            'likes': msg.likes or 0,
-            'dislikes': msg.dislikes or 0
-        })
-    return jsonify(output)
+    try:
+        conn = sqlite3.connect('chat_database.db')
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM messages ORDER BY id ASC')
+        rows = cursor.fetchall()
+        conn.close()
+        
+        messages = [dict(row) for row in rows]
+        return jsonify(messages), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
+# 2. Envoyer un message
 @app.route('/api/send_message', methods=['POST'])
 def send_message():
-    data = request.get_json()
-    if not data or not data.get('message'):
-        return jsonify({'status': 'error', 'message': 'Message vide'}), 400
+    try:
+        data = request.json
+        sender = data.get('sender', 'Visiteur').strip() or 'Visiteur'
+        message = data.get('message', '').strip()
         
-    new_msg = ChatMessage(
-        sender=data.get('sender', 'Visiteur'),
-        message=data.get('message')
-    )
-    db.session.add(new_msg)
-    db.session.commit()
-    return jsonify({'status': 'success'})
+        if not message:
+            return jsonify({'error': 'Message vide'}), 400
+            
+        datetime_str = datetime.now().strftime('%d/%m/%Y à %H:%M')
+        
+        conn = sqlite3.connect('chat_database.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO messages (sender, message, datetime_str, likes, dislikes)
+            VALUES (?, ?, ?, 0, 0)
+        ''', (sender, message, datetime_str))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'success': True}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-@app.route('/api/like_message/<int:msg_id>', methods=['POST'])
-def like_message(msg_id):
-    msg = ChatMessage.query.get_or_404(msg_id)
-    msg.likes = (msg.likes or 0) + 1
-    db.session.commit()
-    return jsonify({'status': 'success', 'likes': msg.likes})
-
-@app.route('/api/dislike_message/<int:msg_id>', methods=['POST'])
-def dislike_message(msg_id):
-    msg = ChatMessage.query.get_or_404(msg_id)
-    msg.dislikes = (msg.dislikes or 0) + 1
-    db.session.commit()
-    return jsonify({'status': 'success', 'dislikes': msg.dislikes})
-
+# 3. Supprimer un message (RESERVÉ À L'ADMINISTRATION)
 @app.route('/api/delete_message/<int:msg_id>', methods=['DELETE'])
 def delete_message(msg_id):
-    msg = ChatMessage.query.get_or_404(msg_id)
-    db.session.delete(msg)
-    db.session.commit()
-    return jsonify({'status': 'success'})
+    try:
+        conn = sqlite3.connect('chat_database.db')
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM messages WHERE id = ?', (msg_id,))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# 4. Reaction : Like
+@app.route('/api/like_message/<int:msg_id>', methods=['POST'])
+def like_message(msg_id):
+    try:
+        conn = sqlite3.connect('chat_database.db')
+        cursor = conn.cursor()
+        cursor.execute('UPDATE messages SET likes = likes + 1 WHERE id = ?', (msg_id,))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# 5. Reaction : Dislike
+@app.route('/api/dislike_message/<int:msg_id>', methods=['POST'])
+def dislike_message(msg_id):
+    try:
+        conn = sqlite3.connect('chat_database.db')
+        cursor = conn.cursor()
+        cursor.execute('UPDATE messages SET dislikes = dislikes + 1 WHERE id = ?', (msg_id,))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
