@@ -1,10 +1,13 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'votre_cle_secrete_ici'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chat.db'
+
+# Utilise la base de données Render si disponible, sinon SQLite en local
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///chat.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -14,7 +17,7 @@ class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     auteur = db.Column(db.String(100), nullable=False)
     contenu = db.Column(db.Text, nullable=False)
-    date_creation = db.Column(db.DateTime, default=datetime.utcnow)
+    date_creation = db.Column(db.DateTime, default=datetime.now)
     likes = db.Column(db.Integer, default=0)
     dislikes = db.Column(db.Integer, default=0)
     
@@ -62,8 +65,8 @@ def contact():
 
     # Récupérer les messages principaux (sans parent_id) pour les afficher
     messages = Message.query.filter_by(parent_id=None).order_by(Message.date_creation.desc()).all()
-    
     return render_template('contact.html', messages=messages)
+
 # Route du Chat Public
 @app.route('/chat', methods=['GET', 'POST'])
 def chat():
@@ -76,7 +79,6 @@ def chat():
             db.session.commit()
             return redirect(url_for('chat'))
             
-    # On récupère uniquement les messages principaux (pas les réponses isolées)
     messages = Message.query.filter_by(parent_id=None).order_by(Message.date_creation.desc()).all()
     return render_template('chat.html', messages=messages)
 
