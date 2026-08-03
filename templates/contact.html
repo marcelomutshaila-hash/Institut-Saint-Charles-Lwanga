@@ -3,74 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact & Message - Institut Saint Charles Lwanga</title>
+    <title>Contact & Messages - INSTITUT SAINT CHARLES LWANGA</title>
+
+    <!-- Bootstrap 5 CSS & FontAwesome Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        body { background-color: #f4f6f9; }
+        :root {
+            --primary-blue: #003366;
+            --secondary-blue: #1b365d;
+            --accent-yellow: #f39c12;
+            --light-bg: #f4f6f9;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- HEADER & NAVBAR --- */
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-blue) !important;
+            font-size: 1.1rem;
+        }
+
+        .navbar-nav .nav-link {
+            font-weight: 600;
+            color: var(--secondary-blue);
+            margin: 0 5px;
+            text-align: center;
+        }
+
+        .navbar-nav .nav-link:hover, .navbar-nav .nav-link.active {
+            color: var(--accent-yellow);
+        }
+
+        .btn-contact-nav {
+            background-color: var(--primary-blue);
+            color: white !important;
+            border-radius: 6px;
+            padding: 8px 20px;
+        }
+
+        /* --- MESSAGES & CHAT --- */
         .message-card {
-            background-color: #1b365d;
+            background-color: var(--secondary-blue);
             color: #ffffff;
             border-radius: 12px;
             padding: 15px;
             margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
         }
-        .author-name { color: #f39c12; font-weight: bold; }
+
+        .author-name {
+            color: var(--accent-yellow);
+            font-weight: bold;
+        }
+
         .admin-reply {
-            border-left: 3px solid #f39c12;
-            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid var(--accent-yellow);
+            background-color: rgba(255, 255, 255, 0.08);
             padding: 10px;
             border-radius: 6px;
             margin-top: 10px;
         }
+
+        /* --- FOOTER --- */
+        footer {
+            background-color: var(--secondary-blue);
+            color: white;
+            margin-top: auto;
+        }
+
+        .map-container {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .social-icons a {
+            color: white;
+            font-size: 1.8rem;
+            margin: 0 12px;
+            transition: transform 0.2s ease;
+            display: inline-block;
+        }
+
+        .social-icons a:hover {
+            transform: scale(1.2);
+        }
+
+        .icon-whatsapp { color: #25D366; }
+        .icon-tiktok { color: #ffffff; }
+        .icon-youtube { color: #FF0000; }
     </style>
 </head>
 <body>
 
-<div class="container my-4" style="max-width: 600px;">
+    <!-- ================= HEADER / NAVIGATION ================= -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" width="40" height="40" class="me-2 d-inline-block align-text-top" onerror="this.style.display='none'">
+                INSTITUT SAINT CHARLES LWANGA
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center my-2 my-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('home') }}">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('a_propos') }}">À propos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('formations') }}">Formations</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('actualites') }}">Actualités</a>
+                    </li>
+                    <li class="nav-item mt-2 mt-lg-0">
+                        <a class="nav-link btn-contact-nav active" href="{{ url_for('contact') }}">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-    <!-- Formulaire d'envoi -->
-    <div class="card p-4 shadow-sm mb-4" style="border-radius: 16px;">
-        <h4 class="mb-3 text-primary text-center">Écrire à l'école / Poser une question</h4>
-        <form action="{{ url_for('contact') }}" method="POST">
-            <div class="mb-3">
-                <input type="text" name="auteur" class="form-control" placeholder="Votre nom ou Email" required>
+    <!-- ================= CONTENU PRINCIPAL ================= -->
+    <div class="container my-5" style="max-width: 650px;">
+
+        <!-- Formulaire d'envoi -->
+        <div class="card p-4 shadow-sm mb-5" style="border-radius: 16px; border: none;">
+            <h4 class="mb-3 text-center" style="color: var(--primary-blue); font-weight: 700;">
+                Écrire à l'école / Poser une question
+            </h4>
+            
+            <!-- Message de confirmation flash -->
+            {% with messages_flash = get_flashed_messages(with_categories=true) %}
+                {% if messages_flash %}
+                    {% for category, msg in messages_flash %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ msg }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('contact') }}" method="POST">
+                <div class="mb-3">
+                    <input type="text" name="auteur" class="form-control form-control-lg" placeholder="Votre nom ou Email" required>
+                </div>
+                <div class="mb-3">
+                    <textarea name="contenu" class="form-control" rows="4" placeholder="Rédiger votre message..." required></textarea>
+                </div>
+                <button type="submit" class="btn w-100 btn-lg text-white" style="background-color: var(--primary-blue); border-radius: 8px;">
+                    Envoyer le message
+                </button>
+            </form>
+        </div>
+
+        <!-- Fil de discussion -->
+        <h5 class="mb-4" style="color: var(--primary-blue); font-weight: 700;">
+            💬 Discussions & Messages récents
+        </h5>
+
+        {% for msg in messages %}
+            <div class="message-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="author-name">{{ msg.auteur }}</span>
+                    <small style="color: #a0b2c6;">{{ msg.date_creation.strftime('%d/%m/%Y à %H:%M') }}</small>
+                </div>
+                <p class="mt-2 mb-1">{{ msg.contenu }}</p>
+
+                <!-- Réponses de l'administrateur rattachées -->
+                {% if msg.reponses %}
+                    {% for rep in msg.reponses %}
+                        <div class="admin-reply">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong style="color: var(--accent-yellow);">👑 Administrateur</strong>
+                                <small style="color: #a0b2c6;">{{ rep.date_creation.strftime('%H:%M') }}</small>
+                            </div>
+                            <p class="mb-0 mt-1">{{ rep.contenu }}</p>
+                        </div>
+                    {% endfor %}
+                {% endif %}
             </div>
-            <div class="mb-3">
-                <textarea name="contenu" class="form-control" rows="3" placeholder="Rédiger votre message..." required></textarea>
+        {% else %}
+            <div class="text-center py-4 bg-white rounded shadow-sm">
+                <p class="text-muted mb-0">Aucun message pour le moment. Soyez le premier à poser une question !</p>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Envoyer le message</button>
-        </form>
+        {% endfor %}
+
     </div>
 
-    <!-- Affichage du Fil de Discussion (Messages et Réponses Admin) -->
-    <h5 class="mb-3" style="color: #1b365d;">Discussions & Messages récents</h5>
-
-    {% for msg in messages %}
-        <div class="message-card">
-            <div class="d-flex justify-content-between">
-                <span class="author-name">{{ msg.auteur }}</span>
-                <small style="color: #a0b2c6;">{{ msg.date_creation.strftime('%d/%m/%Y à %H:%M') }}</small>
+    <!-- ================= FOOTER / PIED DE PAGE ================= -->
+    <footer class="pt-4 pb-3">
+        <div class="container">
+            <!-- Carte Google Maps -->
+            <div class="map-container mb-4 mx-auto" style="max-width: 650px;">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3907.352827725918!2d25.485!3d-10.715!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTDCsDQyJzU0LjAiUyAyNcKwMjknMDYuMCJF!5e0!3m2!1sfr!2scd!4v1650000000000!5m2!1sfr!2scd" 
+                    width="100%" 
+                    height="200" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy">
+                </iframe>
             </div>
-            <p class="mt-2 mb-1">{{ msg.contenu }}</p>
 
-            <!-- Réponses envoyées par l'administrateur -->
-            {% if msg.reponses %}
-                {% for rep in msg.reponses %}
-                    <div class="admin-reply">
-                        <div class="d-flex justify-content-between">
-                            <strong style="color: #f39c12;">👑 Administrateur</strong>
-                            <small style="color: #a0b2c6;">{{ rep.date_creation.strftime('%H:%M') }}</small>
-                        </div>
-                        <p class="mb-0 mt-1">{{ rep.contenu }}</p>
-                    </div>
-                {% endfor %}
-            {% endif %}
+            <!-- Réseaux Sociaux -->
+            <div class="text-center mb-3">
+                <p class="mb-2 fw-bold">Rejoignez-nous sur les réseaux</p>
+                <div class="social-icons">
+                    <a href="https://wa.me/243000000000" target="_blank" class="icon-whatsapp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="https://tiktok.com" target="_blank" class="icon-tiktok"><i class="fab fa-tiktok"></i></a>
+                    <a href="https://youtube.com" target="_blank" class="icon-youtube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+
+            <hr style="border-color: rgba(255,255,255,0.15);">
+
+            <div class="text-center">
+                <small>&copy; 2026 Institut Saint Charles Lwanga - Tous droits réservés.</small>
+            </div>
         </div>
-    {% else %}
-        <p class="text-center text-muted">Aucun message pour le moment.</p>
-    {% endfor %}
+    </footer>
 
-</div>
-
+    <!-- Bootstrap 5 JavaScript Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/bootstrap.bundle.min.js"></script>
 </body>
 </html>
