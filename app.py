@@ -88,10 +88,10 @@ def chat():
     return render_template('chat.html', messages=messages)
 
 # Route du Panneau d'Administration / Modération
-@app.route('/admin')
+@app.route('/admin_chat')
 def admin_panel():
     messages = Message.query.filter_by(parent_id=None).order_by(Message.date_creation.desc()).all()
-    return render_template('admin.html', messages=messages)
+    return render_template('admin_chat.html', messages=messages)
 
 # Route pour Répondre directement à un message (Admin)
 @app.route('/repondre/<int:message_id>', methods=['POST'])
