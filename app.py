@@ -88,7 +88,7 @@ def chat():
     return render_template('chat.html', messages=messages)
 
 # Route du Panneau d'Administration / Modération
-@app.route('/admin_chat')
+@app.route('/admin')
 def admin_panel():
     messages = Message.query.filter_by(parent_id=None).order_by(Message.date_creation.desc()).all()
     return render_template('admin_chat.html', messages=messages)
