@@ -117,3 +117,19 @@ def supprimer(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+# Route pour Liker un message
+@app.route('/like/<int:id>')
+def like(id):
+    msg = Message.query.get_or_404(id)
+    msg.likes += 1
+    db.session.commit()
+    # Redirige vers la page d'où provient la requête (admin, contact ou chat)
+    return redirect(request.referrer or url_for('admin_panel'))
+
+# Route pour Disliker un message
+@app.route('/dislike/<int:id>')
+def dislike(id):
+    msg = Message.query.get_or_404(id)
+    msg.dislikes += 1
+    db.session.commit()
+    return redirect(request.referrer or url_for('admin_panel'))
